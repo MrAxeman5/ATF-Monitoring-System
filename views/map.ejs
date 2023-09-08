@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Player Data</title>
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+
+</head>
+<body>
+    <div class="navbar">
+        <ul class="nav-menu">
+            <li><a href="/">Player Data</a></li>
+        </ul>
+    </div>
+
+    <p id="last-update">Last Update: </p>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        var prevScrollPos = window.pageYOffset;
+        $(window).scroll(function() {
+            var currentScrollPos = window.pageYOffset;
+            if (prevScrollPos > currentScrollPos) {
+                $('.navbar').addClass('active');
+            } else {
+                $('.navbar').removeClass('active');
+            }
+            prevScrollPos = currentScrollPos;
+        });
+    });
+    </script>
+
+
+   
+</body>
+</html>

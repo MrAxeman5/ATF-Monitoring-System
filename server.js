@@ -150,6 +150,11 @@ app.get('/', (req, res) => {
   });
 });
 
+app.get('/map', (req, res) => {
+  res.render("map")
+});
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
