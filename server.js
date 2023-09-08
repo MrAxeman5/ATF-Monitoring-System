@@ -86,7 +86,10 @@ app.get('/api/fetch-data', (req, res) => {
                   name: player._,
                   uptime: player.$?.uptime,
                   isAdmin: player.$?.isAdmin,
+                  controller: player.$?.controller,
                   x: player.$?.x,
+                  y: player.$?.y,
+                  z: player.$?.z,
               }));
 
           // Then send it as JSON response
