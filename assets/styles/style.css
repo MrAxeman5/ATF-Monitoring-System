@@ -83,5 +83,5 @@ th {
 
 /* Add animation styles for the navbar */
 .navbar.active {
-    top: -80px; /* Move the navbar off the screen when active */
+    top: -70px; /* Move the navbar off the screen when active */
 }
