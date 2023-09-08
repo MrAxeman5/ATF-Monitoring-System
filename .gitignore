@@ -3,3 +3,4 @@ package.json
 data.json
 node_modules
 errlog.txt
+.env

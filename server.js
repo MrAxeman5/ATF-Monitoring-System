@@ -1,4 +1,10 @@
+require('dotenv').config();
 const express = require('express');
+const client = require('twilio')(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
+
 const app = express();
 
 const port = 25565;
@@ -14,6 +20,16 @@ app.use(express.static('assets'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+function smsNotifacation(msg){
+  client.messages.create({
+    body: msg,
+    from: process.env.TWILIO_PHONE_NUMBER,
+    to: process.env.YOUR_PHONE_NUMBER,
+  })
+  .then(message => console.log(`Notification sent: ${message.sid}`))
+  .catch(error => console.error(`Error sending notification: ${error.message}`));
+}
+
 // Background script to fetch XML data and convert to JSON every 10 seconds
 setInterval(() => {
   axios.get('http://173.199.76.125:18001/feed/dedicated-server-stats.xml?code=727abb5e6636298712ede57477209220')
@@ -25,6 +41,7 @@ setInterval(() => {
         if (err) {
           console.error('Error parsing XML:', err);
           fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing XML: ' +  err)
+          smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing XML: ' +  err)
           return;
         }
 
@@ -33,6 +50,7 @@ setInterval(() => {
           if (err) {
             console.error('Error writing JSON file:', err);
             fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error writing JSON file: ' +  err)
+            smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error writing JSON file: ' +  err)  
           } else {
             console.log('XML data successfully converted to JSON');
           }
@@ -42,6 +60,7 @@ setInterval(() => {
     .catch(error => {
       console.error('Error fetching XML data:', error);
       fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error fetching XML data: ' +  error)
+      smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error fetching XML data: ' +  error)
     });
 }, 10000); // Run every 10 seconds (10000 milliseconds)
 
@@ -51,6 +70,7 @@ app.get('/api/fetch-data', (req, res) => {
       if (err) {
           console.error('Error reading JSON file:', err);
           fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
+          smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
           res.status(500).json({ error: 'Error reading JSON file' });
           return;
       }
@@ -72,6 +92,7 @@ app.get('/api/fetch-data', (req, res) => {
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
           fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
+          smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
           res.status(500).json({ error: 'Error parsing JSON data' });
       }
   });
@@ -82,6 +103,7 @@ app.get('/', (req, res) => {
     if (err) {
       console.error('Error reading JSON file:', err);
       fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
+      smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
       res.render('error', { message: 'Error reading JSON file' });
       return;
     }
@@ -93,6 +115,7 @@ app.get('/', (req, res) => {
         console.error('No server data or Slots array found in JSON.');
         res.render('error', { message: 'No server data or Slots array found in JSON' });
         fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No server data or Slots array found in JSON')
+        smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No server data or Slots array found in JSON')
         return;
       }
 
@@ -100,6 +123,7 @@ app.get('/', (req, res) => {
       if (!Array.isArray(slots.Player) || slots.Player.length === 0) {
         console.error('No Player array found in JSON.');
         fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No Player data found in JSON')
+        smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No Player data found in JSON')
         res.render('error', { message: 'No Player array found in JSON' });
         return;
       }
@@ -115,6 +139,7 @@ app.get('/', (req, res) => {
     } catch (parseError) {
       console.error('Error parsing JSON data:', parseError);
       fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
+      smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
       res.send( 'Error parsing JSON data');
     }
   });
@@ -131,4 +156,5 @@ app.get('/map', (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
+  smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'ATF Monitoring Server is up and running!')
 });
