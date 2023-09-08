@@ -79,12 +79,14 @@ app.get('/api/fetch-data', (req, res) => {
           const jsonData = JSON.parse(data);
           // Extract and filter player data as needed
           const players = jsonData.Server?.Slots?.[0]?.Player || [];
+          
           const filteredPlayerData = players
               .filter(player => player.$?.isUsed === 'true')
               .map(player => ({
                   name: player._,
                   uptime: player.$?.uptime,
                   isAdmin: player.$?.isAdmin,
+                  x: player.$?.x,
               }));
 
           // Then send it as JSON response
