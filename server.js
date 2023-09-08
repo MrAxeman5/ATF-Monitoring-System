@@ -145,14 +145,6 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/map', (req, res) => {
-  const jsonData = fs.readFileSync('data.json', 'utf-8');
-  const players = JSON.parse(jsonData).Server.Slots[0].Player.filter(player => player._ !== undefined);
-  const imageUrl = '/images/overview.png';
-
-  res.render('map', { players, imageUrl });
-});
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
