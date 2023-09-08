@@ -1,0 +1,87 @@
+/* styles.css */
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(45deg, red, purple,purple, blue);
+}
+page-title{
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: -45vh;
+    background-color: rgba(255, 255, 255, 0.5);
+    
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    color: rgb(0, 0, 0);
+    font-size: 18px;
+}
+
+th {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+#last-update {
+    text-align: center;
+    margin-bottom: 10px; /* Adjust the margin as needed */
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 1%;
+}
+
+.navbar {
+    /* Navbar background color */
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    transition: top 0.3s; /* Smooth transition effect for the navbar */
+}
+
+.logo {
+    float: left; /* Float the logo to the left */
+    padding: 10px;
+}
+
+.logo img {
+    width: 100px; /* Adjust the logo width as needed */
+    height: auto;
+}
+
+.nav-menu {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-menu li {
+    display: inline-block;
+    margin-right: 20px;
+    padding-left: 10px;
+    font-size: 30px;
+}
+
+.nav-menu li:last-child {
+    margin-right: 0; /* Remove margin from the last menu item */
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #fff; /* Menu item text color */
+}
+
+/* Add animation styles for the navbar */
+.navbar.active {
+    top: -80px; /* Move the navbar off the screen when active */
+}

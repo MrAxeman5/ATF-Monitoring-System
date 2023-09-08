@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Player Data</title>
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+</head>
+<body>
+    <div class="navbar">
+        
+        <ul class="nav-menu">
+            <li><a href="/map">Map</a></li>
+        </ul>
+    </div>
+    <h1 class="page-title">Player Data</h1>
+    <table id="player-table">
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Uptime(minutes)</th>
+                <th>Is Admin</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be dynamically populated here using JavaScript -->
+        </tbody>
+    </table>
+
+    <p id="last-update">Last Update: </p>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        var prevScrollPos = window.pageYOffset;
+        $(window).scroll(function() {
+            var currentScrollPos = window.pageYOffset;
+            if (prevScrollPos > currentScrollPos) {
+                $('.navbar').addClass('active');
+            } else {
+                $('.navbar').removeClass('active');
+            }
+            prevScrollPos = currentScrollPos;
+        });
+    });
+    </script>
+
+
+    <script>
+        function updateTable() {
+            // Fetch data from the server
+            fetch('/api/fetch-data') // Replace with the correct server endpoint
+                .then(response => response.json())
+                .then(data => {
+                    // Update the table with the new data
+                    const table = document.getElementById('player-table');
+                    const tbody = table.querySelector('tbody');
+                    tbody.innerHTML = ''; // Clear existing data
+                    // Add new data rows to the table
+                    data.players.forEach(player => {
+                        const row = document.createElement('tr');
+                        const nameCell = document.createElement('td');
+                        const uptimeCell = document.createElement('td');
+                        const isAdminCell = document.createElement('td');
+                        nameCell.textContent = player.name;
+                        uptimeCell.textContent = player.uptime;
+                        isAdminCell.textContent = player.isAdmin;
+                        row.appendChild(nameCell);
+                        row.appendChild(uptimeCell);
+                        row.appendChild(isAdminCell);
+                        tbody.appendChild(row);
+                    });
+
+                    // Update the last update timestamp
+                    const lastUpdate = document.getElementById('last-update');
+                    lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+                })
+                .catch(error => {
+                    console.error('Error updating table:', error);
+                });
+        }
+
+        // Initial table update
+        updateTable();
+
+        // Periodically update the table (e.g., every 10 seconds)
+        setInterval(updateTable, 10000);
+    </script>
+</body>
+</html>
