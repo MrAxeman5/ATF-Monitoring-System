@@ -23,6 +23,7 @@ setInterval(() => {
       parser.parseString(data, (err, result) => {
         if (err) {
           console.error('Error parsing XML:', err);
+          fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing XML: ' +  err)
           return;
         }
 
@@ -30,6 +31,7 @@ setInterval(() => {
         fs.writeFile('data.json', jsonData, 'utf-8', (err) => {
           if (err) {
             console.error('Error writing JSON file:', err);
+            fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error writing JSON file: ' +  err)
           } else {
             console.log('XML data successfully converted to JSON');
           }
@@ -38,6 +40,7 @@ setInterval(() => {
     })
     .catch(error => {
       console.error('Error fetching XML data:', error);
+      fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error fetching XML data: ' +  error)
     });
 }, 10000); // Run every 10 seconds (10000 milliseconds)
 
@@ -46,6 +49,7 @@ app.get('/api/fetch-data', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
       if (err) {
           console.error('Error reading JSON file:', err);
+          fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
           res.status(500).json({ error: 'Error reading JSON file' });
           return;
       }
@@ -66,6 +70,7 @@ app.get('/api/fetch-data', (req, res) => {
           res.json({ players: filteredPlayerData });
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
+          fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
           res.status(500).json({ error: 'Error parsing JSON data' });
       }
   });
@@ -75,6 +80,7 @@ app.get('/', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
     if (err) {
       console.error('Error reading JSON file:', err);
+      fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
       res.render('error', { message: 'Error reading JSON file' });
       return;
     }
@@ -85,12 +91,14 @@ app.get('/', (req, res) => {
       if (!server || !Array.isArray(server.Slots) || server.Slots.length === 0) {
         console.error('No server data or Slots array found in JSON.');
         res.render('error', { message: 'No server data or Slots array found in JSON' });
+        fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No server data or Slots array found in JSON')
         return;
       }
 
       const slots = server.Slots[0];
       if (!Array.isArray(slots.Player) || slots.Player.length === 0) {
         console.error('No Player array found in JSON.');
+        fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No Player data found in JSON')
         res.render('error', { message: 'No Player array found in JSON' });
         return;
       }
@@ -105,6 +113,7 @@ app.get('/', (req, res) => {
       res.render('index', { players: playerData });
     } catch (parseError) {
       console.error('Error parsing JSON data:', parseError);
+      fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
       res.send( 'Error parsing JSON data');
     }
   });
