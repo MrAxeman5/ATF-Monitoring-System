@@ -140,26 +140,31 @@ app.get('/api/fetch-data-map', (req, res) => {
   
         players.forEach(player => {
           const name = player._;
-          const x = player.$?.x; // Check if x is defined for the player
-          if (x !== undefined) {
-            playerPositionMap[name] = x;
+          const x = player.$?.x;
+          const y = player.$?.y;
+          const z = player.$?.z;
+          if (x !== undefined && y !== undefined && z !== undefined) {
+            playerPositionMap[name] = { x, y, z };
           }
         });
   
         vehicles.forEach(vehicle => {
           const controller = vehicle.$.controller;
-          const x = vehicle.$.x; // Check if x is defined for the vehicle
-          if (controller && x !== undefined) {
-            vehiclePositionMap[controller] = x;
+          const x = vehicle.$.x;
+          const y = vehicle.$.y;
+          const z = vehicle.$.z;
+          if (controller && x !== undefined && y !== undefined && z !== undefined) {
+            vehiclePositionMap[controller] = { x, y, z };
           }
         });
   
         // Prepare the data to send to the client
         const playerData = players.map(player => {
           const name = player._;
-          const x = vehiclePositionMap[name] !== undefined ? vehiclePositionMap[name] : playerPositionMap[name];
+
+          const position = vehiclePositionMap[name] || playerPositionMap[name];
           
-          return { name, x };
+          return { name, position };
         });
   
         res.json({ players: playerData });
