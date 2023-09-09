@@ -29,8 +29,10 @@ const dcclient = new Client({
     
     if (channel) {
       if(msg.substring(0,6) == "ERROR:"){
-        channel.send('```ERROR'+ msg + "```");
-      };
+        channel.send('```'+ msg + "```");
+      }
+      elif(msg.substring(0,6) == "ONLINE:");
+      channel.send('```'+ msg + "```");
       // Send a message when the bot is online
       
     } else {
