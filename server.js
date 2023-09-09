@@ -24,6 +24,19 @@ const dcclient = new Client({
       console.error('Channel not found');
     }
   });
+  function dcnotifacation(msg){
+    const channel = dcclient.channels.cache.get('1150042953012740148');
+    
+    if (channel) {
+      if(msg.substring(0,6) == "ERROR:"){
+        channel.send('```ERROR'+ msg + "```");
+      };
+      // Send a message when the bot is online
+      
+    } else {
+      console.error('Channel not found');
+    }
+  };
 const app = express();
 
 const port = 25565;
