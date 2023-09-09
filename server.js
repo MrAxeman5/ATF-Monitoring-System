@@ -65,7 +65,7 @@ setInterval(() => {
 }, 10000); // Run every 10 seconds (10000 milliseconds)
 
 // Route
-app.get('/api/fetch-data', (req, res) => {
+app.get('/api/fetch-data-player-stats', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
       if (err) {
           console.error('Error reading JSON file:', err);
@@ -86,7 +86,6 @@ app.get('/api/fetch-data', (req, res) => {
                   name: player._,
                   uptime: player.$?.uptime,
                   isAdmin: player.$?.isAdmin,
-                  controller: player.$?.controller,
                   x: player.$?.x,
                   y: player.$?.y,
                   z: player.$?.z,
