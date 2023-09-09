@@ -13,31 +13,25 @@ const dcclient = new Client({
 
   dcclient.once('ready', () => {
     console.log(`Logged in as ${dcclient.user.tag}`);
-    
-    // Replace 'YOUR_CHANNEL_ID' with the actual channel ID where you want the message to be sent
-    const channel = dcclient.channels.cache.get('1150042953012740148');
-    
-    if (channel) {
-      // Send a message when the bot is online
-      channel.send('ATF Tracking System is Online');
-    } else {
-      console.error('Channel not found');
-    }
   });
-  function dcnotifacation(msg){
-    const channel = dcclient.channels.cache.get('1150042953012740148');
-    
-    if (channel) {
-      if(msg.substring(0,6) == "ERROR:"){
-        channel.send('```'+ msg + "```");
-      }
-      elif(msg.substring(0,6) == "ONLINE:");
-      channel.send('```'+ msg + "```");
-      // Send a message when the bot is online
-      
-    } else {
-      console.error('Channel not found');
-    }
+  function dcnotifacation(channelId, msg){
+    // Find the channel by its ID
+  const guild = dcclient.guilds.cache.first(); // Get the first guild (server) the bot is in
+  const channel = guild.channels.cache.get(channelId);
+
+  if (!channel) {
+    console.error('Channel not found');
+    return; // Exit the function early
+  }
+
+  // Send the message to the channel
+  channel.send(msg)
+    .then(() => {
+      console.log('Message sent successfully');
+    })
+    .catch(error => {
+      console.error('Error sending message:', error);
+    });
   };
 const app = express();
 
@@ -110,12 +104,18 @@ setInterval(() => {
 }, 10000); // Run every 10 seconds (10000 milliseconds)
 
 // Route
+function secondsToHoursMinutes(seconds) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return `${hours}h ${minutes}m`;
+}
+
 app.get('/api/fetch-data-player-stats', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
       if (err) {
           console.error('Error reading JSON file:', err);
-          fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
-          smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
+          fs.appendFile('errlog.txt', '[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error reading JSON file: ' + err);
+          smsNotifacation('[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error reading JSON file: ' + err);
           res.status(500).json({ error: 'Error reading JSON file' });
           return;
       }
@@ -124,12 +124,12 @@ app.get('/api/fetch-data-player-stats', (req, res) => {
           const jsonData = JSON.parse(data);
           // Extract and filter player data as needed
           const players = jsonData.Server?.Slots?.[0]?.Player || [];
-          
+
           const filteredPlayerData = players
               .filter(player => player.$?.isUsed === 'true')
               .map(player => ({
                   name: player._,
-                  uptime: player.$?.uptime,
+                  uptime: secondsToHoursMinutes(parseInt(player.$?.uptime)),
                   isAdmin: player.$?.isAdmin,
               }));
 
@@ -137,8 +137,8 @@ app.get('/api/fetch-data-player-stats', (req, res) => {
           res.json({ players: filteredPlayerData });
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
-          fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
-          smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
+          fs.appendFile('errlog.txt', '[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error parsing JSON data: ' + parseError);
+          smsNotifacation('[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error parsing JSON data: ' + parseError);
           res.status(500).json({ error: 'Error parsing JSON data' });
       }
   });
@@ -270,5 +270,6 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
   smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'ATF Monitoring Server is up and running!')
   dcclient.login(process.env.BOT_TOKEN)
+  //dcnotifacation('1150042953012740148', "ONLINE: ATF Tracking System")
 });
 
