@@ -105,8 +105,9 @@ setInterval(() => {
 
 // Route
 function secondsToHoursMinutes(seconds) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
+  sec = seconds * 60
+  const hours = Math.floor(sec / 3600);
+  const minutes = Math.floor((sec % 3600) / 60);
   return `${hours}h ${minutes}m`;
 }
 
