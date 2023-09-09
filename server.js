@@ -4,7 +4,26 @@ const client = require('twilio')(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
+const { Client, GatewayIntentBits } = require('discord.js');
+const dcclient = new Client({ 
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages
+  ] });
 
+  dcclient.once('ready', () => {
+    console.log(`Logged in as ${dcclient.user.tag}`);
+    
+    // Replace 'YOUR_CHANNEL_ID' with the actual channel ID where you want the message to be sent
+    const channel = dcclient.channels.cache.get('1150042953012740148');
+    
+    if (channel) {
+      // Send a message when the bot is online
+      channel.send('ATF Tracking System is Online');
+    } else {
+      console.error('Channel not found');
+    }
+  });
 const app = express();
 
 const port = 25565;
@@ -235,4 +254,6 @@ app.get('/map', (req, res) => {
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
   smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'ATF Monitoring Server is up and running!')
+  dcclient.login(process.env.BOT_TOKEN)
 });
+
