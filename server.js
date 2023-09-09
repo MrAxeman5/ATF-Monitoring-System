@@ -210,6 +210,7 @@ app.get('/api/fetch-data-map', (req, res) => {
         // Prepare the data to send to the client
         const playerData = players.map(player => {
           const name = player._;
+          const isAdmin = player.isAdmin
 
           const position = vehiclePositionMap[name] || playerPositionMap[name];
           
