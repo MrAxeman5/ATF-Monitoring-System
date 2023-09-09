@@ -4,7 +4,7 @@ const client = require('twilio')(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const dcclient = new Client({ 
   intents: [
     GatewayIntentBits.Guilds,
@@ -13,26 +13,30 @@ const dcclient = new Client({
 
   dcclient.once('ready', () => {
     console.log(`Logged in as ${dcclient.user.tag}`);
+    dcnotifacation( "ONLINE",  "ATF Tracking System")
   });
-  function dcnotifacation(channelId, msg){
-    // Find the channel by its ID
-  const guild = dcclient.guilds.cache.first(); // Get the first guild (server) the bot is in
-  const channel = guild.channels.cache.get(channelId);
+  function dcnotifacation(type, msg){
+    const channelId = '1150042953012740148'
+    const channel = dcclient.channels.cache.get(channelId);
 
-  if (!channel) {
-    console.error('Channel not found');
-    return; // Exit the function early
+    if (!channel) {
+      console.error('Channel not found');
+      return; // Exit the function early
+    }
+    if(type == "ONLINE"){
+      const embed = new EmbedBuilder()
+        .setColor("#0BFD00") // You can set the color using a hexadecimal color code
+        .setTitle("ATF TRACKING SYSTEM ONLINE");
+      channel.send({embeds: [embed]});
+    }
+    if(type == "ERROR"){
+      const embed = new EmbedBuilder()
+        .setColor("#0BFD00") // You can set the color using a hexadecimal color code
+        .setTitle("ATF TRACKING SYSTEM ERROR")
+        .setDescription(msg);
+      channel.send({embeds: [embed]});
+    };
   }
-
-  // Send the message to the channel
-  channel.send(msg)
-    .then(() => {
-      console.log('Message sent successfully');
-    })
-    .catch(error => {
-      console.error('Error sending message:', error);
-    });
-  };
 const app = express();
 
 const port = 25565;
@@ -55,7 +59,8 @@ function smsNotifacation(msg){
     to: process.env.YOUR_PHONE_NUMBER,
   })
   .then(message => console.log(`Notification sent: ${message.sid}`))
-  .catch(error => console.error(`Error sending notification: ${error.message}`));
+  .catch(error => 
+    console.error(`Error sending notification: ${error.message}`));
 }
 
 // Background script to fetch XML data and convert to JSON every 10 seconds
@@ -69,6 +74,7 @@ setInterval(() => {
         if (err) {
           smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing XML: ' +  err)
           console.error('Error parsing XML:', err);
+          dcnotifacation( "ERROR",  err)
           fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error fetching XML data: ' + error, (appendError) => {
             if (appendError) {
               console.error('Error appending to log file:', appendError);
@@ -82,6 +88,7 @@ setInterval(() => {
         fs.writeFile('data.json', jsonData, 'utf-8', (err) => {
           if (err) {
             smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error writing JSON file: ' +  err)  
+            dcnotifacation( "ERROR",  err)
             console.error('Error writing JSON file:', err);
             fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error writing JSON file: ' + err, (appendError) => {
               if (appendError) {
@@ -97,7 +104,8 @@ setInterval(() => {
       });
     })
     .catch(error => {
-      console.error('Error fetching XML data:', error);
+      console.error('Error fetching XML data:', error)
+      dcnotifacation( "ERROR",  error);
       fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error fetching XML data: ' +  error)
       smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error fetching XML data: ' +  error)
     });
@@ -115,6 +123,7 @@ app.get('/api/fetch-data-player-stats', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
       if (err) {
           console.error('Error reading JSON file:', err);
+          dcnotifacation( "ERROR",  err)
           fs.appendFile('errlog.txt', '[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error reading JSON file: ' + err);
           smsNotifacation('[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error reading JSON file: ' + err);
           res.status(500).json({ error: 'Error reading JSON file' });
@@ -138,6 +147,7 @@ app.get('/api/fetch-data-player-stats', (req, res) => {
           res.json({ players: filteredPlayerData });
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
+          dcnotifacation( "ERROR",  parseError)
           fs.appendFile('errlog.txt', '[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error parsing JSON data: ' + parseError);
           smsNotifacation('[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error parsing JSON data: ' + parseError);
           res.status(500).json({ error: 'Error parsing JSON data' });
@@ -149,6 +159,7 @@ app.get('/api/fetch-data-map', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
       if (err) {
           console.error('Error reading JSON file:', err);
+          dcnotifacation( "ERROR",  err)
           fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error parsing JSON data: ' + parseError, (appendError) => {
             if (appendError) {
               console.error('Error appending to log file:', appendError);
@@ -156,6 +167,7 @@ app.get('/api/fetch-data-map', (req, res) => {
           });
           
           smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
+          dcnotifacation( "ERROR",  err)
           res.status(500).json({ error: 'Error reading JSON file' });
           return;
       }
@@ -202,6 +214,7 @@ app.get('/api/fetch-data-map', (req, res) => {
         res.json({ players: playerData });
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
+          dcnotifacation( "ERROR",  parseError)
           fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'ATF Monitoring Server is up and running!', (appendError) => {
             if (appendError) {
               console.error('Error appending to log file:', appendError);
@@ -209,6 +222,7 @@ app.get('/api/fetch-data-map', (req, res) => {
           });
           
           smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
+          dcnotifacation( "ERROR",  parseError)
           res.status(500).json({ error: 'Error parsing JSON data' });
       }
   });
@@ -218,6 +232,7 @@ app.get('/', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
     if (err) {
       console.error('Error reading JSON file:', err);
+      dcnotifacation( "ERROR",  err)
       fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
       smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
       res.render('error', { message: 'Error reading JSON file' });
@@ -230,6 +245,7 @@ app.get('/', (req, res) => {
       if (!server || !Array.isArray(server.Slots) || server.Slots.length === 0) {
         console.error('No server data or Slots array found in JSON.');
         res.render('error', { message: 'No server data or Slots array found in JSON' });
+        dcnotifacation( "ERROR", 'No server data or Slots array found in JSON' )
         fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No server data or Slots array found in JSON')
         smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No server data or Slots array found in JSON')
         return;
@@ -238,6 +254,7 @@ app.get('/', (req, res) => {
       const slots = server.Slots[0];
       if (!Array.isArray(slots.Player) || slots.Player.length === 0) {
         console.error('No Player array found in JSON.');
+        dcnotifacation( "ERROR",  'No Player array found in JSON.')
         fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No Player data found in JSON')
         smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No Player data found in JSON')
         res.render('error', { message: 'No Player array found in JSON' });
@@ -254,6 +271,7 @@ app.get('/', (req, res) => {
       res.render('index', { players: playerData });
     } catch (parseError) {
       console.error('Error parsing JSON data:', parseError);
+      dcnotifacation( "ERROR",  parseError)
       fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
       smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
       res.send( 'Error parsing JSON data');
@@ -271,6 +289,5 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
   smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'ATF Monitoring Server is up and running!')
   dcclient.login(process.env.BOT_TOKEN)
-  //dcnotifacation('1150042953012740148', "ONLINE: ATF Tracking System")
 });
 
