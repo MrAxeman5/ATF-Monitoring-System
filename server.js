@@ -4,7 +4,26 @@ const client = require('twilio')(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
+const { Client, GatewayIntentBits } = require('discord.js');
+const dcclient = new Client({ 
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages
+  ] });
 
+  dcclient.once('ready', () => {
+    console.log(`Logged in as ${dcclient.user.tag}`);
+    
+    // Replace 'YOUR_CHANNEL_ID' with the actual channel ID where you want the message to be sent
+    const channel = dcclient.channels.cache.get('1150042953012740148');
+    
+    if (channel) {
+      // Send a message when the bot is online
+      channel.send('ATF Tracking System is Online');
+    } else {
+      console.error('Channel not found');
+    }
+  });
 const app = express();
 
 const port = 25565;
@@ -39,18 +58,29 @@ setInterval(() => {
       const parser = new xml2js.Parser();
       parser.parseString(data, (err, result) => {
         if (err) {
-          console.error('Error parsing XML:', err);
-          fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing XML: ' +  err)
           smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing XML: ' +  err)
+          console.error('Error parsing XML:', err);
+          fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error fetching XML data: ' + error, (appendError) => {
+            if (appendError) {
+              console.error('Error appending to log file:', appendError);
+            }
+          });          
+          
           return;
         }
 
         const jsonData = JSON.stringify(result);
         fs.writeFile('data.json', jsonData, 'utf-8', (err) => {
           if (err) {
-            console.error('Error writing JSON file:', err);
-            fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error writing JSON file: ' +  err)
             smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error writing JSON file: ' +  err)  
+            console.error('Error writing JSON file:', err);
+            fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error writing JSON file: ' + err, (appendError) => {
+              if (appendError) {
+                console.error('Error appending to log file:', appendError);
+              }
+            });
+            
+            
           } else {
             console.log('XML data successfully converted to JSON');
           }
@@ -65,7 +95,7 @@ setInterval(() => {
 }, 10000); // Run every 10 seconds (10000 milliseconds)
 
 // Route
-app.get('/api/fetch-data', (req, res) => {
+app.get('/api/fetch-data-player-stats', (req, res) => {
   fs.readFile('data.json', 'utf-8', (err, data) => {
       if (err) {
           console.error('Error reading JSON file:', err);
@@ -86,10 +116,6 @@ app.get('/api/fetch-data', (req, res) => {
                   name: player._,
                   uptime: player.$?.uptime,
                   isAdmin: player.$?.isAdmin,
-                  controller: player.$?.controller,
-                  x: player.$?.x,
-                  y: player.$?.y,
-                  z: player.$?.z,
               }));
 
           // Then send it as JSON response
@@ -97,6 +123,75 @@ app.get('/api/fetch-data', (req, res) => {
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
           fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
+          smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
+          res.status(500).json({ error: 'Error parsing JSON data' });
+      }
+  });
+});
+
+app.get('/api/fetch-data-map', (req, res) => {
+  fs.readFile('data.json', 'utf-8', (err, data) => {
+      if (err) {
+          console.error('Error reading JSON file:', err);
+          fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error parsing JSON data: ' + parseError, (appendError) => {
+            if (appendError) {
+              console.error('Error appending to log file:', appendError);
+            }
+          });
+          
+          smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
+          res.status(500).json({ error: 'Error reading JSON file' });
+          return;
+      }
+
+      try {
+        const jsonData = JSON.parse(data);
+        const slots = jsonData.Server?.Slots?.[0] || {};
+        const players = slots.Player || [];
+        const vehicles = jsonData.Server?.Vehicles?.[0]?.Vehicle || [];
+  
+        // Create maps to store player positions and vehicle positions
+        const playerPositionMap = {};
+        const vehiclePositionMap = {};
+  
+        players.forEach(player => {
+          const name = player._;
+          const x = player.$?.x;
+          const y = player.$?.y;
+          const z = player.$?.z;
+          if (x !== undefined && y !== undefined && z !== undefined) {
+            playerPositionMap[name] = { x, y, z };
+          }
+        });
+  
+        vehicles.forEach(vehicle => {
+          const controller = vehicle.$.controller;
+          const x = vehicle.$.x;
+          const y = vehicle.$.y;
+          const z = vehicle.$.z;
+          if (controller && x !== undefined && y !== undefined && z !== undefined) {
+            vehiclePositionMap[controller] = { x, y, z };
+          }
+        });
+  
+        // Prepare the data to send to the client
+        const playerData = players.map(player => {
+          const name = player._;
+
+          const position = vehiclePositionMap[name] || playerPositionMap[name];
+          
+          return { name, position };
+        });
+  
+        res.json({ players: playerData });
+      } catch (parseError) {
+          console.error('Error parsing JSON data:', parseError);
+          fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'ATF Monitoring Server is up and running!', (appendError) => {
+            if (appendError) {
+              console.error('Error appending to log file:', appendError);
+            }
+          });
+          
           smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
           res.status(500).json({ error: 'Error parsing JSON data' });
       }
@@ -159,4 +254,6 @@ app.get('/map', (req, res) => {
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
   smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'ATF Monitoring Server is up and running!')
+  dcclient.login(process.env.BOT_TOKEN)
 });
+
