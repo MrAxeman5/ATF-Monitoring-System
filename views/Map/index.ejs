@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Map2</title>
+    <title>FS22 Map</title>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,8 +11,9 @@
     <script src="https://cdn.rawgit.com/ardhi/Leaflet.MousePosition/master/src/L.Control.MousePosition.js" type="text/javascript"></script>
     <style>
       html, body { width:100%; height:100%; margin:0; padding:0; background: #ffffff; }
-      #sidebar { width: 20%; height: 100%; float: right; background: #f0f0f0; overflow-y: scroll; }
-      #map { width: 80%; height: 100%; float: left; }
+      #container { width: 100%; height: 100%; display: flex; flex-direction: row; }
+      #sidebar { width: 20%; background: #f0f0f0; overflow-y: scroll; }
+      #map { width: 100%; height: 100%; }
       #slider { position: absolute; top: 10px; right: 10px; z-index: 5; }
       /* Define CSS styles for the sprite marker */
       .sprite-marker {
@@ -20,219 +21,151 @@
         height: 32px; /* Adjust the size of the sprite */
         background-image: url('https://media.tenor.com/yheo1GGu3FwAAAAC/rick-roll-rick-ashley.gif'); /* Replace with the actual path to your sprite image */
         background-size: cover;
+        cursor: pointer; /* Add a pointer cursor to indicate clickability */
+      }
+      /* Add this CSS style to your <style> block */
+      .player-name:hover {
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <div id="sidebar">
-      <table>
-        <thead>
-          <tr>
-            <th>Player Name</th>
-            <th>X Coordinate</th>
-            <th>Y Coordinate</th>
-            <th>Z Coordinate</th>
-          </tr>
-        </thead>
-        <tbody id="player-table-body">
-          <!-- Player data will be inserted here dynamically -->
-        </tbody>
-      </table>
+    <div id="container">
+      <div id="sidebar">
+        <table>
+          <thead>
+            <tr>
+              <th colspan="4">Player Information</th>
+            </tr>
+            <tr>
+              <th>Player Name</th>
+              <th>X Coordinate</th>
+              <th>Z Coordinate</th>
+              <th>Height</th>
+            </tr>
+          </thead>
+          <tbody id="player-table-body">
+            <!-- Player data will be inserted here dynamically -->
+          </tbody>
+        </table>
+        <div id="sprite-status">Sprite Status: </div> <!-- This is the new header for sprite status -->
+        <div id="last-update"></div> <!-- This is the last update timestamp -->
+      </div>
+      <div id="map"></div>
     </div>
-    <div id="map"></div>
     <input id="slider" type="range" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)">
     <!-- ... Your HTML and CSS code ... -->
 
     <!-- Add the following JavaScript code block before the closing </body> tag -->
     <script type="text/javascript">
-      // Load the map metadata (you can use an AJAX request)
-      var mapMetadata = {
-        "name": "Map3 Enlarged",
-  "version": "1.1.0",
-  "description": "",
-  "attribution": "<a href=\"https://www.maptiler.com/engine/\">Rendered with MapTiler Engine</a>, non-commercial use only",
-  "type": "overlay",
-  "format": "png",
-  "minzoom": "0",
-  "maxzoom": "5",
-  "scale": "1.000000",
-  "profile": "custom",
-  "crs": "RASTER",
-  "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
-  "tile_matrix": [
-  {
-    "id": "0",
-    "tile_size": [512, 512],
-    "origin": [0.00000000, 0.00000000],
-    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
-    "pixel_size": [32.00000000, -32.00000000],
-    "matrix_size": [1, 1],
-    "scale_denominator": 114285.71428571
-  },
-  {
-    "id": "1",
-    "tile_size": [512, 512],
-    "origin": [0.00000000, 0.00000000],
-    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
-    "pixel_size": [16.00000000, -16.00000000],
-    "matrix_size": [2, 2],
-    "scale_denominator": 57142.85714286
-  },
-  {
-    "id": "2",
-    "tile_size": [512, 512],
-    "origin": [0.00000000, 0.00000000],
-    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
-    "pixel_size": [8.00000000, -8.00000000],
-    "matrix_size": [3, 3],
-    "scale_denominator": 28571.42857143
-  },
-  {
-    "id": "3",
-    "tile_size": [512, 512],
-    "origin": [0.00000000, 0.00000000],
-    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
-    "pixel_size": [4.00000000, -4.00000000],
-    "matrix_size": [5, 5],
-    "scale_denominator": 14285.71428571
-  },
-  {
-    "id": "4",
-    "tile_size": [512, 512],
-    "origin": [0.00000000, 0.00000000],
-    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
-    "pixel_size": [2.00000000, -2.00000000],
-    "matrix_size": [9, 9],
-    "scale_denominator": 7142.85714286
-  },
-  {
-    "id": "5",
-    "tile_size": [512, 512],
-    "origin": [0.00000000, 0.00000000],
-    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
-    "pixel_size": [1.00000000, -1.00000000],
-    "matrix_size": [17, 17],
-    "scale_denominator": 3571.42857143
-  }
-]
-      };
+      // Declare height and width variables for your image
+      var height = 2118; // Adjust to match the height of your image
+      var width = 2148; // Adjust to match the width of your image
 
       // Create the Leaflet map with maxBounds option
       var map = L.map('map', {
-        maxZoom: 5, // Set the maximum zoom level based on your data
-        minZoom: 0,
+        maxZoom: 5, // Adjust the maximum zoom level as needed
+        minZoom: -2,
         crs: L.CRS.Simple,
-        maxBounds: [[0, 0], [-8592, 8472]] // Set maxBounds based on your data
       });
 
-      // Add a tile layer using the information from mapMetadata
-      var layer = L.tileLayer('{z}/{x}/{y}.png', {
-        tileSize: L.point(512, 512), // Adjust the tile size here
-        attribution: mapMetadata.attribution,
-        noWrap: true,
-        tms: false,
-      }).addTo(map);
+      // Add a custom image as the map
+      var imageUrl = '../images/map.png'; // Adjust the path to your image
+      var imageBounds = [[0, 0], [height, width]]; // Adjust the bounds of your image (height and width)
+      L.imageOverlay(imageUrl, imageBounds).addTo(map);
 
       // Define the CSS styles for the sprite marker
       var spriteMarkerStyle = {
         width: '32px',
         height: '32px',
         backgroundSize: 'cover',
+        cursor: 'pointer', // Add a pointer cursor to indicate clickability
       };
 
-// Fetch player data from the server and update the sidebar and map
-function updateTable() {
-  fetch('/api/fetch-data-map')
-    .then(response => response.json())
-    .then(data => {
-      // Clear existing markers
-      map.eachLayer(function (layer) {
-        if (layer instanceof L.Marker) {
-          map.removeLayer(layer);
-        }
-      });
+      // Initialize the MousePosition control to display coordinates
+      L.control.mousePosition().addTo(map);
 
-      // Clear the player table
-      const tableBody = document.getElementById('player-table-body');
-      tableBody.innerHTML = '';
+      // Updated updateTable function
+      function updateTable() {
+        fetch('/api/fetch-data-map')
+          .then(response => response.json())
+          .then(data => {
+            const playerTableBody = document.getElementById('player-table-body');
+            const markers = {}; // Create an object to store markers
 
-      // Variable to check if a sprite is within the map
-      let spriteWithinMap = false;
+            // Clear existing player information in the sidebar
+            playerTableBody.innerHTML = '';
 
-      data.players.forEach(player => {
-        if (player.position) {
-          // Convert player coordinates to pixel positions on the map
-          const zoomLevel = map.getZoom();
-          const tileMatrix = mapMetadata.tile_matrix[zoomLevel];
-          const tileSize = tileMatrix.tile_size;
-          const tileOrigin = tileMatrix.origin;
-          const playerX = player.position.x - tileOrigin[0];
-          const playerY = tileOrigin[1] - player.position.y;
-          const playerZ = player.position.z; // Use the Z coordinate
+            data.players.forEach(player => {
+              if (player.position) {
+                // Translate player coordinates to pixel positions on the map
+                const pixelX = (parseFloat(player.position.x) + width / 2) * (width / 2148); // Adjust as needed
+                const pixelZ = (height - (parseFloat(player.position.z) + height / 2)) * (height / 2118); // Flip the Z-coordinate
+                const pixelY = parseFloat(player.position.y) * (height / 1059); // Adjust as needed for height
 
-          // Calculate the pixel position on the map
-          const pixelX = (playerX / tileSize[0]) * (tileSize[0] * Math.pow(2, zoomLevel));
-          const pixelY = (playerY / tileSize[1]) * (tileSize[1] * Math.pow(2, zoomLevel));
+                // Create a custom marker (sprite) for each player
+                const spriteMarker = L.divIcon({
+                  className: 'sprite-marker',
+                  iconSize: [32, 32], // Size of the sprite (adjust as needed)
+                  iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
+                  html: `<div>${player.name}</div>`, // Display the player's name as content
+                  style: spriteMarkerStyle, // Apply the CSS style to the sprite
+                });
 
-          // Check if the sprite is within the map bounds
-          const bounds = map.getBounds();
-          const spriteLatLng = map.unproject([pixelX, pixelY], zoomLevel);
-          if (bounds.contains(spriteLatLng)) {
-            spriteWithinMap = true;
-          }
+                // Create a marker with the sprite icon
+                const marker = L.marker([pixelZ, pixelX], {
+                  icon: spriteMarker,
+                  title: player.name, // Set the tooltip content to the player's name
+                });
 
-          // Create a custom marker (sprite) and add it to the map with a tooltip
-          L.marker(map.unproject([pixelX, pixelY], zoomLevel), {
-            icon: L.divIcon({
-              className: 'sprite-marker',
-              iconSize: [32, 32], // Size of the sprite (adjust as needed)
-              iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
-              style: spriteMarkerStyle, // Apply the CSS style to the sprite
-              html: `<div>${player.name}</div>`, // Display the player's name as tooltip content
-            }),
-            title: player.name, // Set the tooltip content to the player's name
-          }).addTo(map);
+                // Add a click event listener to the marker
+                marker.on('click', function () {
+                  // Update the sprite status in the sidebar
+                  const spriteStatus = document.getElementById('sprite-status');
+                  spriteStatus.textContent = 'Sprite Status: In Map';
+                });
 
-          // Add player data to the sidebar including Y and Z coordinates
-          var row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${player.name}</td>
-            <td>${player.position.x}</td>
-            <td>${player.position.y}</td>
-            <td>${player.position.z}</td>
-          `;
-          tableBody.appendChild(row);
-        }
-      });
+                // Add the marker to the map
+                marker.addTo(map);
 
-      // Add a header to the sidebar
-      tableBody.insertAdjacentHTML(
-        'beforebegin',
-        `
-        <tr>
-          <th colspan="4">Player Information</th>
-        </tr>
-        `
-      );
+                // Add player information to the sidebar
+                const playerInfo = document.createElement('tr');
+                playerInfo.innerHTML = `
+                  <td class="player-name">${player.name}</td>
+                  <td>${player.position.x}</td>
+                  <td>${player.position.z}</td>
+                  <td>${player.position.y}</td>
+                `;
+                playerTableBody.appendChild(playerInfo);
 
-      // Update the last update timestamp
-      const lastUpdate = document.getElementById('last-update');
-      lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+                // Store the marker with a unique key
+                markers[player.name] = marker;
+              }
+            });
 
-      // Use the spriteWithinMap variable to determine if the sprite is within the map
-      if (spriteWithinMap) {
-        console.log('Sprite is within the map');
-      } else {
-        console.log('Sprite is outside the map');
+            // Update the last update timestamp
+            const lastUpdate = document.getElementById('last-update');
+            lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+
+            // Add click event listeners to player names in the sidebar
+            const playerNames = document.querySelectorAll('.player-name');
+            playerNames.forEach(playerName => {
+              playerName.addEventListener('click', function () {
+                const lat = parseFloat(this.getAttribute('data-lat'));
+                const lng = parseFloat(this.getAttribute('data-lng'));
+                map.setView([lat, lng], 5); // Zoom to the player's location
+              });
+            });
+          })
+          .catch(error => {
+            console.error('Error updating table:', error);
+          });
       }
-    })
-    .catch(error => {
-      console.error('Error updating table:', error);
-    });
-}
-      // Initialize the map view and update the table
-      map.setView([0, 0], 2); // Center the map at 0,0 and adjust the initial zoom as needed
 
+      // Initialize the map view and zoom level
+      map.setView([height / 2, width / 2], 2); // Center the map and adjust the initial zoom as needed
+
+      // Update the map initially and periodically
       updateTable();
       setInterval(updateTable, 10000);
     </script>
