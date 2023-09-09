@@ -192,6 +192,7 @@ app.get('/api/fetch-data-map', (req, res) => {
           const x = player.$?.x;
           const y = player.$?.y;
           const z = player.$?.z;
+          const isPlayerAdmin = player.$?.isAdmin;
           if (x !== undefined && y !== undefined && z !== undefined) {
             playerPositionMap[name] = { x, y, z };
           }
@@ -210,11 +211,10 @@ app.get('/api/fetch-data-map', (req, res) => {
         // Prepare the data to send to the client
         const playerData = players.map(player => {
           const name = player._;
-          const isAdmin = player.isAdmin
-
+          const isAdmin = player.$?.isAdmin;
           const position = vehiclePositionMap[name] || playerPositionMap[name];
           
-          return { name, position };
+          return { name, position, isAdmin };
         });
   
         res.json({ players: playerData });
