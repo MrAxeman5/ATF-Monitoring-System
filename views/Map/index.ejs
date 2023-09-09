@@ -10,66 +10,231 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js" type="text/javascript"></script>
     <script src="https://cdn.rawgit.com/ardhi/Leaflet.MousePosition/master/src/L.Control.MousePosition.js" type="text/javascript"></script>
     <style>
-      html, body, #map { width:100%; height:100%; margin:0; padding:0; z-index: 1; background: #ffffff; }
-      #slider{ position: absolute; top: 10px; right: 10px; z-index: 5; }
+      html, body { width:100%; height:100%; margin:0; padding:0; background: #ffffff; }
+      #sidebar { width: 20%; height: 100%; float: right; background: #f0f0f0; overflow-y: scroll; }
+      #map { width: 80%; height: 100%; float: left; }
+      #slider { position: absolute; top: 10px; right: 10px; z-index: 5; }
       /* Define CSS styles for the sprite marker */
       .sprite-marker {
         width: 32px; /* Adjust the size of the sprite */
         height: 32px; /* Adjust the size of the sprite */
-        background-image: url('path/to/sprite.png'); /* Provide the path to your sprite image */
+        background-image: url('https://media.tenor.com/yheo1GGu3FwAAAAC/rick-roll-rick-ashley.gif'); /* Replace with the actual path to your sprite image */
         background-size: cover;
       }
     </style>
   </head>
   <body>
+    <div id="sidebar">
+      <table>
+        <thead>
+          <tr>
+            <th>Player Name</th>
+            <th>X Coordinate</th>
+            <th>Y Coordinate</th>
+            <th>Z Coordinate</th>
+          </tr>
+        </thead>
+        <tbody id="player-table-body">
+          <!-- Player data will be inserted here dynamically -->
+        </tbody>
+      </table>
+    </div>
     <div id="map"></div>
     <input id="slider" type="range" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)">
-    <script type="text/javascript">
-      var mapExtent = [0.00000000, -2148.00000000, 2118.00000000, 0.00000000];
-      var mapMinZoom = 0;
-      var mapMaxZoom = 3;
-      var mapMaxResolution = 1.00000000;
-      var mapMinResolution = Math.pow(2, mapMaxZoom) * mapMaxResolution;
-      var tileExtent = [0.00000000, -2148.00000000, 2118.00000000, 0.00000000];
-      var crs = L.CRS.Simple;
-      crs.transformation = new L.Transformation(1, -tileExtent[0], -1, tileExtent[3]);
-      crs.scale = function(zoom) {
-        return Math.pow(2, zoom) / mapMinResolution;
-      };
-      crs.zoom = function(scale) {
-        return Math.log(scale * mapMinResolution) / Math.LN2;
-      };
-      var layer;
-      var map = new L.Map('map', {
-          maxZoom: mapMaxZoom,
-          minZoom: mapMinZoom,
-          crs: crs
-        });
-        
-        layer = L.tileLayer('{z}/{x}/{y}.png', {
-          minZoom: mapMinZoom, maxZoom: mapMaxZoom,
-          tileSize: L.point(512, 512),
-          attribution: '<a href="https://www.maptiler.com/engine/">Rendered with MapTiler Engine</a>, non-commercial use only',
-          noWrap: true,
-          tms: false
-        }).addTo(map);
-      map.fitBounds([
-        crs.unproject(L.point(mapExtent[2], mapExtent[3])),
-        crs.unproject(L.point(mapExtent[0], mapExtent[1]))
-      ]);
-      L.control.mousePosition().addTo(map);
+    <!-- ... Your HTML and CSS code ... -->
 
-      // Create a custom marker (sprite) and add it to the map
-      var spriteMarker = L.marker([0, 0], {
-        icon: L.divIcon({
-          className: 'sprite-marker', // Use the CSS class defined above
-          iconSize: [32, 32], // Size of the sprite (adjust as needed)
-          iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
-        })
+    <!-- Add the following JavaScript code block before the closing </body> tag -->
+    <script type="text/javascript">
+      // Load the map metadata (you can use an AJAX request)
+      var mapMetadata = {
+        "name": "Map3 Enlarged",
+  "version": "1.1.0",
+  "description": "",
+  "attribution": "<a href=\"https://www.maptiler.com/engine/\">Rendered with MapTiler Engine</a>, non-commercial use only",
+  "type": "overlay",
+  "format": "png",
+  "minzoom": "0",
+  "maxzoom": "5",
+  "scale": "1.000000",
+  "profile": "custom",
+  "crs": "RASTER",
+  "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
+  "tile_matrix": [
+  {
+    "id": "0",
+    "tile_size": [512, 512],
+    "origin": [0.00000000, 0.00000000],
+    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
+    "pixel_size": [32.00000000, -32.00000000],
+    "matrix_size": [1, 1],
+    "scale_denominator": 114285.71428571
+  },
+  {
+    "id": "1",
+    "tile_size": [512, 512],
+    "origin": [0.00000000, 0.00000000],
+    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
+    "pixel_size": [16.00000000, -16.00000000],
+    "matrix_size": [2, 2],
+    "scale_denominator": 57142.85714286
+  },
+  {
+    "id": "2",
+    "tile_size": [512, 512],
+    "origin": [0.00000000, 0.00000000],
+    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
+    "pixel_size": [8.00000000, -8.00000000],
+    "matrix_size": [3, 3],
+    "scale_denominator": 28571.42857143
+  },
+  {
+    "id": "3",
+    "tile_size": [512, 512],
+    "origin": [0.00000000, 0.00000000],
+    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
+    "pixel_size": [4.00000000, -4.00000000],
+    "matrix_size": [5, 5],
+    "scale_denominator": 14285.71428571
+  },
+  {
+    "id": "4",
+    "tile_size": [512, 512],
+    "origin": [0.00000000, 0.00000000],
+    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
+    "pixel_size": [2.00000000, -2.00000000],
+    "matrix_size": [9, 9],
+    "scale_denominator": 7142.85714286
+  },
+  {
+    "id": "5",
+    "tile_size": [512, 512],
+    "origin": [0.00000000, 0.00000000],
+    "extent": [0.00000000, -8592.00000000, 8472.00000000, 0.00000000],
+    "pixel_size": [1.00000000, -1.00000000],
+    "matrix_size": [17, 17],
+    "scale_denominator": 3571.42857143
+  }
+]
+      };
+
+      // Create the Leaflet map with maxBounds option
+      var map = L.map('map', {
+        maxZoom: 5, // Set the maximum zoom level based on your data
+        minZoom: 0,
+        crs: L.CRS.Simple,
+        maxBounds: [[0, 0], [-8592, 8472]] // Set maxBounds based on your data
+      });
+
+      // Add a tile layer using the information from mapMetadata
+      var layer = L.tileLayer('{z}/{x}/{y}.png', {
+        tileSize: L.point(512, 512), // Adjust the tile size here
+        attribution: mapMetadata.attribution,
+        noWrap: true,
+        tms: false,
       }).addTo(map);
 
-      // Set the initial sprite marker position (replace with your coordinates)
-      spriteMarker.setLatLng([100, 100]); // Replace with your desired coordinates
+      // Define the CSS styles for the sprite marker
+      var spriteMarkerStyle = {
+        width: '32px',
+        height: '32px',
+        backgroundSize: 'cover',
+      };
+
+// Fetch player data from the server and update the sidebar and map
+function updateTable() {
+  fetch('/api/fetch-data-map')
+    .then(response => response.json())
+    .then(data => {
+      // Clear existing markers
+      map.eachLayer(function (layer) {
+        if (layer instanceof L.Marker) {
+          map.removeLayer(layer);
+        }
+      });
+
+      // Clear the player table
+      const tableBody = document.getElementById('player-table-body');
+      tableBody.innerHTML = '';
+
+      // Variable to check if a sprite is within the map
+      let spriteWithinMap = false;
+
+      data.players.forEach(player => {
+        if (player.position) {
+          // Convert player coordinates to pixel positions on the map
+          const zoomLevel = map.getZoom();
+          const tileMatrix = mapMetadata.tile_matrix[zoomLevel];
+          const tileSize = tileMatrix.tile_size;
+          const tileOrigin = tileMatrix.origin;
+          const playerX = player.position.x - tileOrigin[0];
+          const playerY = tileOrigin[1] - player.position.y;
+          const playerZ = player.position.z; // Use the Z coordinate
+
+          // Calculate the pixel position on the map
+          const pixelX = (playerX / tileSize[0]) * (tileSize[0] * Math.pow(2, zoomLevel));
+          const pixelY = (playerY / tileSize[1]) * (tileSize[1] * Math.pow(2, zoomLevel));
+
+          // Check if the sprite is within the map bounds
+          const bounds = map.getBounds();
+          const spriteLatLng = map.unproject([pixelX, pixelY], zoomLevel);
+          if (bounds.contains(spriteLatLng)) {
+            spriteWithinMap = true;
+          }
+
+          // Create a custom marker (sprite) and add it to the map with a tooltip
+          L.marker(map.unproject([pixelX, pixelY], zoomLevel), {
+            icon: L.divIcon({
+              className: 'sprite-marker',
+              iconSize: [32, 32], // Size of the sprite (adjust as needed)
+              iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
+              style: spriteMarkerStyle, // Apply the CSS style to the sprite
+              html: `<div>${player.name}</div>`, // Display the player's name as tooltip content
+            }),
+            title: player.name, // Set the tooltip content to the player's name
+          }).addTo(map);
+
+          // Add player data to the sidebar including Y and Z coordinates
+          var row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${player.name}</td>
+            <td>${player.position.x}</td>
+            <td>${player.position.y}</td>
+            <td>${player.position.z}</td>
+          `;
+          tableBody.appendChild(row);
+        }
+      });
+
+      // Add a header to the sidebar
+      tableBody.insertAdjacentHTML(
+        'beforebegin',
+        `
+        <tr>
+          <th colspan="4">Player Information</th>
+        </tr>
+        `
+      );
+
+      // Update the last update timestamp
+      const lastUpdate = document.getElementById('last-update');
+      lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+
+      // Use the spriteWithinMap variable to determine if the sprite is within the map
+      if (spriteWithinMap) {
+        console.log('Sprite is within the map');
+      } else {
+        console.log('Sprite is outside the map');
+      }
+    })
+    .catch(error => {
+      console.error('Error updating table:', error);
+    });
+}
+      // Initialize the map view and update the table
+      map.setView([0, 0], 2); // Center the map at 0,0 and adjust the initial zoom as needed
+
+      updateTable();
+      setInterval(updateTable, 10000);
     </script>
   </body>
 </html>
