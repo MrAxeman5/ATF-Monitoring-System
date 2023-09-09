@@ -19,9 +19,6 @@
                 <th>Uptime(minutes)</th>
                 <th>Is Admin</th>
                 <th>Is Player In Vehicle</th>
-                <th>Position x</th>
-                <th>Position y</th>
-                <th>Position z</th>
             </tr>
         </thead>
         <tbody>
@@ -65,24 +62,16 @@
                         const uptimeCell = document.createElement('td');
                         const isAdminCell = document.createElement('td');
                         const isPlayerInVehicle = document.createElement('td');
-                        const playerPosXCell = document.createElement('td');
-                        const playerPosYCell = document.createElement('td');
-                        const playerPosZCell = document.createElement('td');
+
         
                         nameCell.textContent = player.name;
                         uptimeCell.textContent = player.uptime;
                         isAdminCell.textContent = player.isAdmin;
                         isPlayerInVehicle.textContent = player.controller;
-                        playerPosXCell.textContent = player.x;
-                        playerPosYCell.textContent = player.y;
-                        playerPosZCell.textContent = player.z;
                         row.appendChild(nameCell);
                         row.appendChild(uptimeCell);
                         row.appendChild(isAdminCell);
                         row.appendChild(isPlayerInVehicle );
-                        row.appendChild(playerPosXCell);
-                        row.appendChild(playerPosYCell);
-                        row.appendChild(playerPosZCell);
                         tbody.appendChild(row);
                     });
 

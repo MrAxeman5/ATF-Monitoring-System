@@ -97,9 +97,6 @@ app.get('/api/fetch-data-player-stats', (req, res) => {
                   name: player._,
                   uptime: player.$?.uptime,
                   isAdmin: player.$?.isAdmin,
-                  x: player.$?.x,
-                  y: player.$?.y,
-                  z: player.$?.z,
               }));
 
           // Then send it as JSON response

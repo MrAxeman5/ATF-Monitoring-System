@@ -5,6 +5,11 @@
     <link rel="stylesheet" type="text/css" href="styles/style.css">
 </head>
 <body>
+    <div class="navbar">
+        <ul class="nav-menu">
+            <li><a href="/">Player Stats</a></li>
+        </ul>
+    </div>
     <h1>Player Data</h1>
     <table>
         <thead>
@@ -43,9 +48,9 @@
                         tableBody.appendChild(row);
                     });
 
-                    // Update the last update timestamp
-                    const lastUpdate = document.getElementById('last-update');
-                    lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+            // Update the last update timestamp
+            const lastUpdate = document.getElementById('last-update');
+            lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
                 })
                 .catch(error => {
                     console.error('Error updating table:', error);
