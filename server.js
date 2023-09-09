@@ -131,17 +131,22 @@ app.get('/api/fetch-data-player-stats', (req, res) => {
       }
 
       try {
-          const jsonData = JSON.parse(data);
-          // Extract and filter player data as needed
-          const players = jsonData.Server?.Slots?.[0]?.Player || [];
+        const jsonData = JSON.parse(data);
+        // Extract and filter player data as needed
+        const players = jsonData.Server?.Slots?.[0]?.Player || [];
 
-          const filteredPlayerData = players
-              .filter(player => player.$?.isUsed === 'true')
-              .map(player => ({
-                  name: player._,
-                  uptime: secondsToHoursMinutes(parseInt(player.$?.uptime)),
-                  isAdmin: player.$?.isAdmin,
-              }));
+        const filteredPlayerData = players
+            .filter(player => player.$?.isUsed === 'true')
+            .map(player => {
+                const isInVehicle = typeof player.$?.x !== 'undefined';
+                return {
+                    name: player._,
+                    uptime: secondsToHoursMinutes(parseInt(player.$?.uptime)),
+                    isAdmin: player.$?.isAdmin,
+                    isInVehicle: isInVehicle,
+                };
+            });
+              
 
           // Then send it as JSON response
           res.json({ players: filteredPlayerData });
