@@ -2,35 +2,53 @@
 <html>
 <head>
     <title>Player Data</title>
-    <link rel="stylesheet" type="text/css" href="styles/style.css">
-
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
-    <div class="navbar">
-        <ul class="nav-menu">
-            <li><a href="/">Player Data</a></li>
-        </ul>
-    </div>
+    <h1>Player Data</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Position</th>
+            </tr>
+        </thead>
+        <tbody id="player-table-body">
+            <!-- Table body content will be dynamically generated here -->
+        </tbody>
+    </table>
 
     <p id="last-update">Last Update: </p>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-    $(document).ready(function() {
-        var prevScrollPos = window.pageYOffset;
-        $(window).scroll(function() {
-            var currentScrollPos = window.pageYOffset;
-            if (prevScrollPos > currentScrollPos) {
-                $('.navbar').addClass('active');
-            } else {
-                $('.navbar').removeClass('active');
-            }
-            prevScrollPos = currentScrollPos;
-        });
-    });
+        function updateTable() {
+            fetch('/api/fetch-data-map') // Fetch player data from the server
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('player-table-body');
+                    tableBody.innerHTML = ''; // Clear existing table rows
+
+                    data.players.forEach(player => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${player.name}</td>
+                            <td>${player.x !== undefined ? player.x : 'N/A'}</td> <!-- Check if x is available -->
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    // Update the last update timestamp
+                    const lastUpdate = document.getElementById('last-update');
+                    lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+                })
+                .catch(error => {
+                    console.error('Error updating table:', error);
+                });
+        }
+
+        // Initial update and periodic updates every 10 seconds
+        updateTable();
+        setInterval(updateTable, 10000);
     </script>
-
-
-   
 </body>
 </html>
