@@ -203,10 +203,9 @@ app.get('/api/fetch-data-map', (req, res) => {
           const x = vehicle.$.x;
           const y = vehicle.$.y;
           const z = vehicle.$.z;
-          const vehicleName = vehicle.$.name;
-          const vehicleType = vehicle.$.type
+
           if (controller && x !== undefined && y !== undefined && z !== undefined) {
-            vehiclePositionMap[controller] = { x, y, z, vehicleName, vehicleType };
+            vehiclePositionMap[controller] = { x, y, z};
           }
         });
   
@@ -215,10 +214,8 @@ app.get('/api/fetch-data-map', (req, res) => {
           const name = player._;
           const isAdmin = player.$?.isAdmin;
           const position = vehiclePositionMap[name] || playerPositionMap[name];
-          const vehicleName = position?.vehicleName;
-          const vehicleType = position?.vehicleType;
           
-          return { name, position, isAdmin, vehicleName, vehicleType };
+          return { name, position, isAdmin,};
         });
   
         res.json({ players: playerData });
