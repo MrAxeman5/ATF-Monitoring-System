@@ -21,7 +21,6 @@
         height: 32px; /* Adjust the size of the sprite */
         background-size: cover;
         background-image: url('https://media.tenor.com/yheo1GGu3FwAAAAC/rick-roll-rick-ashley.gif'); /* Replace with the actual path to your sprite image */
-
         cursor: pointer; /* Add a pointer cursor to indicate clickability */
       }
       /* Define CSS styles for the admin sprite marker */
@@ -30,39 +29,19 @@
         height: 32px; /* Adjust the size of the sprite */
         background-size: cover;
         background-image: url('https://static.wikia.nocookie.net/super-mario-64-official/images/4/4a/Hellomynameisadmin.PNG'); /* Replace with the actual path to your sprite image */
-
         cursor: pointer; /* Add a pointer cursor to indicate clickability */
       }
       /* Add this CSS style to your <style> block */
-      .player-name-tooltip {
+      .player-tooltip {
         display: none; /* Hide the tooltip by default */
         position: absolute;
-        background-color: white;
         padding: 4px;
         border: 1px solid #ccc;
         z-index: 9999;
-        /* Define tooltip text color for admin players */
-        color: purple; /* Make the text color purple for admin players */
-      }
-      /* Add this CSS style to your <style> block */
-      .admin-player-tooltip {
-        display: none; /* Hide the tooltip by default */
-        position: absolute;
-        background-color: purple; /* Make the background color purple for admin players */
-        padding: 4px;
-        border: 1px solid #ccc;
-        z-index: 9999;
-        /* Define tooltip text color for admin players */
-        color: white; /* Make the text color white for admin players */
       }
       /* Show the tooltip when sprite is hovered or clicked */
-      .sprite-marker:hover + .player-name-tooltip,
-      .sprite-marker.clicked + .player-name-tooltip {
-        display: block;
-      }
-      /* Show the tooltip when admin sprite is hovered or clicked */
-      .sprite-marker-admin:hover + .admin-player-tooltip,
-      .sprite-marker-admin.clicked + .admin-player-tooltip {
+      .sprite-marker:hover + .player-tooltip,
+      .sprite-marker.clicked + .player-tooltip {
         display: block;
       }
       /* Add this CSS style to your <style> block */
@@ -139,7 +118,6 @@
 
                 // Determine the CSS class for the sprite marker based on admin status
                 const spriteMarkerClass = player.isAdmin && player.isAdmin.toLowerCase() === "true" ? 'sprite-marker-admin' : 'sprite-marker';
-                const spriteTooltipClass = player.isAdmin && player.isAdmin.toLowerCase() === "true" ? 'admin-player-tooltip' : 'player-name-tooltip';
 
                 // Create a custom marker (sprite) for each player
                 const spriteMarker = L.divIcon({
@@ -153,9 +131,12 @@
                   icon: spriteMarker,
                 });
 
+                // Add the marker to the map
+                marker.addTo(map);
+
                 // Create a tooltip for the marker (player's name)
                 const tooltip = L.tooltip({
-                  permanent: false,
+                  permanent: true,
                   direction: 'right',
                   offset: [16, 0], // Adjust the tooltip position as needed
                 }).setContent(player.name);
@@ -163,29 +144,10 @@
                 // Bind the tooltip to the marker
                 marker.bindTooltip(tooltip);
 
-                // Add a click event listener to the marker
-                marker.on('click', function () {
-                  // Toggle the "clicked" class to show/hide the tooltip
-                  marker._icon.classList.toggle('clicked');
-                });
-
-                // Add the marker to the map
-                marker.addTo(map);
-
-                // Create a tooltip for the marker (player's name)
-                const adminTooltip = L.tooltip({
-                  permanent: false,
-                  direction: 'right',
-                  offset: [16, 0], // Adjust the tooltip position as needed
-                }).setContent(player.name);
-
-                // Bind the tooltip to the marker
-                marker.bindTooltip(adminTooltip);
-
                 // Add player information to the sidebar
                 const playerInfo = document.createElement('tr');
                 playerInfo.innerHTML = `
-                  <td class="${spriteTooltipClass}" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+                  <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
                   <td>${player.position.x}</td>
                   <td>${player.position.z}</td>
                   <td>${player.position.y}</td>
