@@ -1,0 +1,47 @@
+const categoryToSprite = {
+    TRAILERS: 'trailers.png',
+    TRACTORSM: 'tractors.png',
+    FERTILIZERSPREADERS: 'tools.png',
+    SKIDSTEERTOOLS: 'tools.png',
+    LOWLOADERS: 'tractors.png',
+    TRACTORSL: 'tractors.png',
+    FRONTLOADERTOOLS: 'tools.png',
+    WEIGHTS: 'tools.png',
+    WINDROWERS: 'tools.png',
+    BALELOADERS: 'trailers.png',
+    MOWERS: 'tools.png',
+    MANURESPREADERS: 'trailers.png',
+    SLURRYVEHICLES: 'tractors.png',
+    PLANTERS: 'tools.png',
+    ROLLERS: 'tools.png',
+    ANIMALS: 'animals.png',
+    CORNHEADERS: 'tools.png',
+    LOADERWAGONS: 'trailers.png',
+    TEDDERS: 'tools.png',
+    SEEDERS: 'tools.png',
+    TRACTORSL: 'tractors.png',
+    FRONTLOADERS: 'tractors.png',
+    GRAPEVEHICLES: 'tractors.png',
+    GRAPETOOLS: 'tools.png',
+    MULCHERS: 'tools.png',
+    POTATOVEHICLES: 'tractors.png',
+    COTTONVEHICLES: 'tractors.png',
+    POTATOHARVESTING: 'tools.png',
+    WHEELLOADERVEHICLES: 'tractors.png',
+    WHEELLOADERTOOLS: 'tools.png',
+    POWERHARROWS: 'tools.png',
+    BALERS: 'tools.png',
+    BIGBAGS: 'bags.png',
+    COTTONHARVESTING: 'trailers.png',
+    MISC: 'misc.png'
+    HARVESTERS: 'tractors.png',
+    PLOWS: 'tools.png',
+    CUTTERS: 'tools.png',
+    SLURRYTANKS: 'trailers.png',
+    PALLETS: 'pallets.png',
+
+
+
+
+    
+};
