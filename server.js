@@ -217,8 +217,16 @@ app.get('/api/fetch-data-map', (req, res) => {
           
           return { name, position, isAdmin,};
         });
+        
+        const vehicleData = vehicles.map(vehicle => {
+          const name = vehicle.$?.name;
+          const type = vehicle.$?.type;
+          
+
+          return{ name, type }
+        })
   
-        res.json({ players: playerData });
+        res.json({ players: playerData, vehicles: vehicleData });
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
           dcnotifacation( "ERROR",  parseError)
