@@ -1,6 +1,6 @@
 const typeToSprite = {
-    trainTrailer:                           'tools.png',
-    trainTimberTrailer:                     'tools.png',
+    trainTrailer:                           'train.png',
+    trainTimberTrailer:                     'train.png',
     spreader:                               'tools.png',
     trailer:                                'trailers.png',
     tractor:                                'vehicles.png',
