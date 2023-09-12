@@ -20,15 +20,23 @@
         width: 32px; /* Adjust the size of the sprite */
         height: 32px; /* Adjust the size of the sprite */
         background-size: cover;
-        background-image: url('https://media.tenor.com/yheo1GGu3FwAAAAC/rick-roll-rick-ashley.gif'); /* Replace with the actual path to your sprite image */
+        background-image: url('images/mapsprites/default-sprite-image.png'); /* Replace with the actual path to your sprite image */
+        cursor: pointer; /* Add a pointer cursor to indicate clickability */
+      }
+      .tractor-marker {
+        width: 32px; /* Adjust the size of the sprite */
+        height: 32px; /* Adjust the size of the sprite */
+        background-size: cover;
+        background-image: url('images/mapsprites/vehicles.png'); /* Replace with the actual path to your sprite image */
         cursor: pointer; /* Add a pointer cursor to indicate clickability */
       }
       /* Define CSS styles for the admin sprite marker */
       .sprite-marker-admin {
         width: 32px; /* Adjust the size of the sprite */
         height: 32px; /* Adjust the size of the sprite */
-        background-size: cover;
-        background-image: url('https://static.wikia.nocookie.net/super-mario-64-official/images/4/4a/Hellomynameisadmin.PNG'); /* Replace with the actual path to your sprite image */
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-image: url('images/mapsprites/admin-sprite.svg'); /* Replace with the actual path to your sprite image */
         cursor: pointer; /* Add a pointer cursor to indicate clickability */
       }
       /* Add this CSS style to your <style> block */
@@ -82,83 +90,122 @@
       // Declare height and width variables for your image
       var height = 2118; // Adjust to match the height of your image
       var width = 2148; // Adjust to match the width of your image
-
+    
       // Create the Leaflet map with maxBounds option
       var map = L.map('map', {
         maxZoom: 5, // Adjust the maximum zoom level as needed
         minZoom: -2,
         crs: L.CRS.Simple,
       });
-
+    
       // Add a custom image as the map
       var imageUrl = '../images/map.png'; // Adjust the path to your image
       var imageBounds = [[0, 0], [height, width]]; // Adjust the bounds of your image (height and width)
       L.imageOverlay(imageUrl, imageBounds).addTo(map);
-
+    
       // Initialize the MousePosition control to display coordinates
       L.control.mousePosition().addTo(map);
-
+    
+      // Create an object to store markers
+      const markers = {};
+    
+      // Create a map to store player names and their corresponding rows
+      const playerRows = new Map();
+    
       // Updated updateTable function
       function updateTable() {
         fetch('/api/fetch-data-map')
           .then(response => response.json())
           .then(data => {
             const playerTableBody = document.getElementById('player-table-body');
-            const markers = {}; // Create an object to store markers
-
-            // Clear existing player information in the sidebar
-            playerTableBody.innerHTML = '';
-
+    
+            // Store the names of players that are currently present in the updated data
+            const presentPlayerNames = new Set();
+    
             data.players.forEach(player => {
               if (player.position) {
                 // Translate player coordinates to pixel positions on the map
                 const pixelX = (parseFloat(player.position.x) + width / 2) * (width / 2148); // Adjust as needed
                 const pixelZ = (height - (parseFloat(player.position.z) + height / 2)) * (height / 2118); // Flip the Z-coordinate
                 const pixelY = parseFloat(player.position.y) * (height / 1059); // Adjust as needed for height
-
+    
                 // Determine the CSS class for the sprite marker based on admin status
                 const spriteMarkerClass = player.isAdmin && player.isAdmin.toLowerCase() === "true" ? 'sprite-marker-admin' : 'sprite-marker';
-
-                // Create a custom marker (sprite) for each player
-                const spriteMarker = L.divIcon({
-                  className: spriteMarkerClass, // Use the determined class for styling
-                  iconSize: [32, 32], // Size of the sprite (adjust as needed)
-                  iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
-                });
-
-                // Create a marker with the sprite icon
-                const marker = L.marker([pixelZ, pixelX], {
-                  icon: spriteMarker,
-                });
-
-                // Add the marker to the map
-                marker.addTo(map);
-
-                // Create a tooltip for the marker (player's name)
-                const tooltip = L.tooltip({
-                  permanent: true,
-                  direction: 'right',
-                  offset: [16, 0], // Adjust the tooltip position as needed
-                }).setContent(player.name);
-
-                // Bind the tooltip to the marker
-                marker.bindTooltip(tooltip);
-
-                // Add player information to the sidebar
-                const playerInfo = document.createElement('tr');
-                playerInfo.innerHTML = `
-                  <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
-                  <td>${player.position.x}</td>
-                  <td>${player.position.z}</td>
-                  <td>${player.position.y}</td>
-                `;
-                playerTableBody.appendChild(playerInfo);
-
-                // Store the marker with a unique key
-                markers[player.name] = marker;
+    
+                if (!markers[player.name]) {
+                  // Create a custom marker (sprite) for each player if it doesn't exist
+                  const spriteMarker = L.divIcon({
+                    className: spriteMarkerClass, // Use the determined class for styling
+                    iconSize: [32, 32], // Size of the sprite (adjust as needed)
+                    iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
+                  });
+    
+                  // Create a marker with the sprite icon
+                  const marker = L.marker([pixelZ, pixelX], {
+                    icon: spriteMarker,
+                  });
+    
+                  // Create a tooltip for the marker (player's name)
+                  const tooltip = L.tooltip({
+                    permanent: true,
+                    direction: 'right',
+                    offset: [16, 0], // Adjust the tooltip position as needed
+                  }).setContent(player.name);
+    
+                  // Bind the tooltip to the marker
+                  marker.bindTooltip(tooltip);
+    
+                  // Add the marker to the map
+                  marker.addTo(map);
+    
+                  // Store the marker with a unique key
+                  markers[player.name] = marker;
+                } else {
+                  // Update the existing marker's position
+                  markers[player.name].setLatLng([pixelZ, pixelX]);
+                }
+    
+                // Check if a row for this player already exists in the sidebar
+                if (playerRows.has(player.name)) {
+                  // Update the existing row with new coordinates
+                  const playerRow = playerRows.get(player.name);
+                  playerRow.innerHTML = `
+                    <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+                    <td>${player.position.x}</td>
+                    <td>${player.position.z}</td>
+                    <td>${player.position.y}</td>
+                  `;
+                } else {
+                  // Create a new row for the player in the sidebar
+                  const playerInfo = document.createElement('tr');
+                  playerInfo.innerHTML = `
+                    <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+                    <td>${player.position.x}</td>
+                    <td>${player.position.z}</td>
+                    <td>${player.position.y}</td>
+                  `;
+                  playerTableBody.appendChild(playerInfo);
+                  playerRows.set(player.name, playerInfo);
+                }
+    
+                // Add the player's name to the set of present players
+                presentPlayerNames.add(player.name);
               }
             });
-
+    
+            // Remove markers and rows for players that are no longer present
+            Object.keys(markers).forEach(name => {
+              if (!presentPlayerNames.has(name)) {
+                // Remove the marker from the map
+                map.removeLayer(markers[name]);
+                // Remove the row from the sidebar
+                playerTableBody.removeChild(playerRows.get(name));
+                // Delete the marker and row from their respective data structures
+                delete markers[name];
+                playerRows.delete(name);
+              }
+            });
+    
             // Update the last update timestamp
             const lastUpdate = document.getElementById('last-update');
             lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
@@ -167,10 +214,10 @@
             console.error('Error updating table:', error);
           });
       }
-
+    
       // Initialize the map view and zoom level
       map.setView([height / 2, width / 2], -2); // Center the map and adjust the initial zoom as needed
-
+    
       // Update the map initially and periodically
       updateTable();
       setInterval(updateTable, 10000);
