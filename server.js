@@ -221,9 +221,12 @@ app.get('/api/fetch-data-map', (req, res) => {
         const vehicleData = vehicles.map(vehicle => {
           const name = vehicle.$?.name;
           const type = vehicle.$?.type;
-          
-
-          return{ name, type }
+          const vX = vehicle.$?.x;
+          const vY = vehicle.$?.y;
+          const vZ = vehicle.$?.z;
+          const controller = vehicle.$?.controller;
+        
+          return{ name, type, vX, vY, vZ, controller }
         })
   
         res.json({ players: playerData, vehicles: vehicleData });

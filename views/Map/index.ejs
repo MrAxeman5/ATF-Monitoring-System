@@ -23,7 +23,7 @@
         background-image: url('images/mapsprites/default-sprite-image.png'); /* Replace with the actual path to your sprite image */
         cursor: pointer; /* Add a pointer cursor to indicate clickability */
       }
-      .tractor-marker {
+      .vehicle-sprite-marker {
         width: 32px; /* Adjust the size of the sprite */
         height: 32px; /* Adjust the size of the sprite */
         background-size: cover;
@@ -85,142 +85,230 @@
     <input id="slider" type="range" min="0" max="1" step="0.1" value="1" oninput="layer.setOpacity(this.value)">
     <!-- ... Your HTML and CSS code ... -->
 
-    <!-- Add the following JavaScript code block before the closing </body> tag -->
-    <script type="text/javascript">
-      // Declare height and width variables for your image
-      var height = 2118; // Adjust to match the height of your image
-      var width = 2148; // Adjust to match the width of your image
-    
-      // Create the Leaflet map with maxBounds option
-      var map = L.map('map', {
-        maxZoom: 5, // Adjust the maximum zoom level as needed
-        minZoom: -2,
-        crs: L.CRS.Simple,
-      });
-    
-      // Add a custom image as the map
-      var imageUrl = '../images/map.png'; // Adjust the path to your image
-      var imageBounds = [[0, 0], [height, width]]; // Adjust the bounds of your image (height and width)
-      L.imageOverlay(imageUrl, imageBounds).addTo(map);
-    
-      // Initialize the MousePosition control to display coordinates
-      L.control.mousePosition().addTo(map);
-    
-      // Create an object to store markers
-      const markers = {};
-    
-      // Create a map to store player names and their corresponding rows
-      const playerRows = new Map();
-    
-      // Updated updateTable function
-      function updateTable() {
-        fetch('/api/fetch-data-map')
-          .then(response => response.json())
-          .then(data => {
-            const playerTableBody = document.getElementById('player-table-body');
-    
-            // Store the names of players that are currently present in the updated data
-            const presentPlayerNames = new Set();
-    
-            data.players.forEach(player => {
-              if (player.position) {
-                // Translate player coordinates to pixel positions on the map
-                const pixelX = (parseFloat(player.position.x) + width / 2) * (width / 2148); // Adjust as needed
-                const pixelZ = (height - (parseFloat(player.position.z) + height / 2)) * (height / 2118); // Flip the Z-coordinate
-                const pixelY = parseFloat(player.position.y) * (height / 1059); // Adjust as needed for height
-    
-                // Determine the CSS class for the sprite marker based on admin status
-                const spriteMarkerClass = player.isAdmin && player.isAdmin.toLowerCase() === "true" ? 'sprite-marker-admin' : 'sprite-marker';
-    
-                if (!markers[player.name]) {
-                  // Create a custom marker (sprite) for each player if it doesn't exist
-                  const spriteMarker = L.divIcon({
-                    className: spriteMarkerClass, // Use the determined class for styling
-                    iconSize: [32, 32], // Size of the sprite (adjust as needed)
-                    iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
-                  });
-    
-                  // Create a marker with the sprite icon
-                  const marker = L.marker([pixelZ, pixelX], {
-                    icon: spriteMarker,
-                  });
-    
-                  // Create a tooltip for the marker (player's name)
-                  const tooltip = L.tooltip({
-                    permanent: true,
-                    direction: 'right',
-                    offset: [16, 0], // Adjust the tooltip position as needed
-                  }).setContent(player.name);
-    
-                  // Bind the tooltip to the marker
-                  marker.bindTooltip(tooltip);
-    
-                  // Add the marker to the map
-                  marker.addTo(map);
-    
-                  // Store the marker with a unique key
-                  markers[player.name] = marker;
-                } else {
-                  // Update the existing marker's position
-                  markers[player.name].setLatLng([pixelZ, pixelX]);
-                }
-    
-                // Check if a row for this player already exists in the sidebar
-                if (playerRows.has(player.name)) {
-                  // Update the existing row with new coordinates
-                  const playerRow = playerRows.get(player.name);
-                  playerRow.innerHTML = `
-                    <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
-                    <td>${player.position.x}</td>
-                    <td>${player.position.z}</td>
-                    <td>${player.position.y}</td>
-                  `;
-                } else {
-                  // Create a new row for the player in the sidebar
-                  const playerInfo = document.createElement('tr');
-                  playerInfo.innerHTML = `
-                    <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
-                    <td>${player.position.x}</td>
-                    <td>${player.position.z}</td>
-                    <td>${player.position.y}</td>
-                  `;
-                  playerTableBody.appendChild(playerInfo);
-                  playerRows.set(player.name, playerInfo);
-                }
-    
-                // Add the player's name to the set of present players
-                presentPlayerNames.add(player.name);
+<!-- Add the following JavaScript code block before the closing </body> tag -->
+<script type="text/javascript">
+  // Declare height and width variables for your image
+  var height = 2118; // Adjust to match the height of your image
+  var width = 2148; // Adjust to match the width of your image
+  
+  // Vehicle offsets (adjust as needed)
+  var vehicleOffsetX = 0;
+  var vehicleOffsetZ = 0;
+  
+  // Create the Leaflet map with maxBounds option
+  var map = L.map('map', {
+    maxZoom: 5, // Adjust the maximum zoom level as needed
+    minZoom: -2,
+    crs: L.CRS.Simple,
+  });
+  
+  // Add a custom image as the map
+  var imageUrl = '../images/map.png'; // Adjust the path to your image
+  var imageBounds = [[0, 0], [height, width]]; // Adjust the bounds of your image (height and width)
+  L.imageOverlay(imageUrl, imageBounds).addTo(map);
+  
+  // Initialize the MousePosition control to display coordinates
+  L.control.mousePosition().addTo(map);
+  
+  // Create an object to store markers
+  const markers = {};
+  
+  // Create a map to store player names and their corresponding rows
+  const playerRows = new Map();
+  
+  // Updated updateTable function
+  function updateTable() {
+    fetch('/api/fetch-data-map')
+      .then(response => response.json())
+      .then(data => {
+        const playerTableBody = document.getElementById('player-table-body');
+  
+        // Store the names of players and vehicles that are currently present in the updated data
+        const presentPlayerNames = new Set();
+        const presentVehicleNames = new Set();
+  
+        data.players.forEach(player => {
+   if (player.position) {
+              // Translate player coordinates to pixel positions on the map
+              const pixelX = (parseFloat(player.position.x) + width / 2) * (width / 2148); // Adjust as needed
+              const pixelZ = (height - (parseFloat(player.position.z) + height / 2)) * (height / 2118); // Flip the Z-coordinate
+              const pixelY = parseFloat(player.position.y) * (height / 1059); // Adjust as needed for height
+  
+              // Determine the CSS class for the sprite marker based on admin status
+              const spriteMarkerClass = player.isAdmin && player.isAdmin.toLowerCase() === "true" ? 'sprite-marker-admin' : 'sprite-marker';
+  
+              if (!markers[player.name]) {
+                // Create a custom marker (sprite) for each player if it doesn't exist
+                const spriteMarker = L.divIcon({
+                  className: spriteMarkerClass, // Use the determined class for styling
+                  iconSize: [32, 32], // Size of the sprite (adjust as needed)
+                  iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
+                });
+  
+                // Create a marker with the sprite icon
+                const marker = L.marker([pixelZ, pixelX], {
+                  icon: spriteMarker,
+                });
+  
+                // Create a tooltip for the marker (player's name)
+                const tooltip = L.tooltip({
+                  permanent: true,
+                  direction: 'right',
+                  offset: [16, 0], // Adjust the tooltip position as needed
+                }).setContent(player.name);
+  
+                // Bind the tooltip to the marker
+                marker.bindTooltip(tooltip);
+  
+                // Add the marker to the map
+                marker.addTo(map);
+  
+                // Store the marker with a unique key
+                markers[player.name] = marker;
+              } else {
+                // Update the existing marker's position
+                markers[player.name].setLatLng([pixelZ, pixelX]);
               }
-            });
-    
-            // Remove markers and rows for players that are no longer present
-            Object.keys(markers).forEach(name => {
-              if (!presentPlayerNames.has(name)) {
-                // Remove the marker from the map
-                map.removeLayer(markers[name]);
-                // Remove the row from the sidebar
-                playerTableBody.removeChild(playerRows.get(name));
-                // Delete the marker and row from their respective data structures
-                delete markers[name];
-                playerRows.delete(name);
+  
+              // Check if a row for this player already exists in the sidebar
+              if (playerRows.has(player.name)) {
+                // Update the existing row with new coordinates
+                const playerRow = playerRows.get(player.name);
+                playerRow.innerHTML = `
+                  <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+                  <td>${player.position.x}</td>
+                  <td>${player.position.z}</td>
+                  <td>${player.position.y}</td>
+                `;
+              } else {
+                // Create a new row for the player in the sidebar
+                const playerInfo = document.createElement('tr');
+                playerInfo.innerHTML = `
+                  <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+                  <td>${player.position.x}</td>
+                  <td>${player.position.z}</td>
+                  <td>${player.position.y}</td>
+                `;
+                playerTableBody.appendChild(playerInfo);
+                playerRows.set(player.name, playerInfo);
               }
-            });
-    
-            // Update the last update timestamp
-            const lastUpdate = document.getElementById('last-update');
-            lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
-          })
-          .catch(error => {
-            console.error('Error updating table:', error);
+  
+              // Add the player's name to the set of present players
+              presentPlayerNames.add(player.name);
+            }
           });
-      }
-    
-      // Initialize the map view and zoom level
-      map.setView([height / 2, width / 2], -2); // Center the map and adjust the initial zoom as needed
-    
-      // Update the map initially and periodically
-      updateTable();
-      setInterval(updateTable, 10000);
-    </script>
-  </body>
+  
+          // Remove markers and rows for players that are no longer present
+          Object.keys(markers).forEach(name => {
+            if (!presentPlayerNames.has(name)) {
+              // Remove the marker from the map
+              map.removeLayer(markers[name]);
+              // Remove the row from the sidebar
+              playerTableBody.removeChild(playerRows.get(name));
+              // Delete the marker and row from their respective data structures
+              delete markers[name];
+              playerRows.delete(name);
+            }
+          });
+  
+        // Handle vehicles
+        data.vehicles.forEach(vehicle => {
+          // Check if this vehicle type has a specific sprite image defined
+          let vehicleSpriteImage = getVehicleSpriteImage(vehicle.type);
+  
+          if (!vehicleSpriteImage) {
+            // If no specific sprite image is defined, use a default image
+            vehicleSpriteImage = 'images/mapsprites/default-vehicle.png';
+          }
+  
+          // Update the vehicle's position based on the specified offset
+          const vehicleX = (parseFloat(vehicle.vX) + width / 2) * (width / 2148); // Adjust as needed
+          const vehicleZ = (height - (parseFloat(vehicle.vZ) + height / 2)) * (height / 2118); // Flip the Z-coordinate
+          const vehicleY = parseFloat(vehicle.vY) * (height / 1059); // Adjust as needed for height  
+          
+              if (!markers[vehicle.name]) {
+            // Create a custom marker (sprite) for each vehicle if it doesn't exist
+            const spriteMarker = L.divIcon({
+              className: 'vehicle-marker',
+              iconSize: [32, 32], // Size of the sprite (adjust as needed)
+              iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
+              html: `<img src="${vehicleSpriteImage}" alt="${vehicle.name}" width="32" height="32">`, // Use the vehicle sprite image
+            });
+  
+            // Create a marker with the sprite icon
+            const marker = L.marker([vehicleZ, vehicleX], {
+              icon: spriteMarker,
+            });
+  
+            // Create a tooltip for the marker (vehicle's name)
+            const tooltip = L.tooltip({
+              permanent: false,
+              direction: 'right',
+              offset: [16, 0], // Adjust the tooltip position as needed
+            }).setContent(vehicle.name);
+  
+            // Bind the tooltip to the marker
+            marker.bindTooltip(tooltip);
+  
+            // Add the marker to the map
+            marker.addTo(map);
+  
+            // Store the marker with a unique key
+            markers[vehicle.name] = marker;
+          } else {
+            // Update the existing marker's position
+            markers[vehicle.name].setLatLng([vehicleZ, vehicleX]);
+          }
+  
+          // Add the vehicle's name to the set of present names
+          presentVehicleNames.add(vehicle.name);
+        });
+  
+        // Remove markers and rows for names that are no longer present
+        Object.keys(markers).forEach(name => {
+          if (!presentPlayerNames.has(name) && !presentVehicleNames.has(name)) {
+            // Remove the marker from the map
+            map.removeLayer(markers[name]);
+            // Remove the row from the sidebar
+            playerTableBody.removeChild(playerRows.get(name));
+            // Delete the marker and row from their respective data structures
+            delete markers[name];
+            playerRows.delete(name);
+          }
+        });
+  
+        // Update the last update timestamp
+        const lastUpdate = document.getElementById('last-update');
+        lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+      })
+      .catch(error => {
+        console.error('Error updating table:', error);
+      });
+  }
+  
+  // Function to get the sprite image for a specific vehicle type
+  function getVehicleSpriteImage(type) {
+    // Define mappings of vehicle types to sprite images
+    const vehicleTypeMappings = {
+      'tractor': 'images/mapsprites/vehicles.png', // Example: 'tractor' type uses 'tractor.png' image
+      'cutter': 'images/mapsprites/vehicles.png', // Example: 'tractor' type uses 'tractor.png' image
+      'tractorReverseDriving': 'images/mapsprites/vehicles.png', // Example: 'tractor' type uses 'tractor.png' image
+      'trailer': 'images/mapsprites/trailers.png', // Example: 'tractor' type uses 'tractor.png' image
+      'trainTrailer': 'images/mapsprites/trailers.png', // Example: 'tractor' type uses 'tractor.png' image
+      'trainTimberTrailer': 'images/mapsprites/trailers.png', // Example: 'tractor' type uses 'tractor.png' image
+      // Add more mappings as needed
+    };
+  
+    return vehicleTypeMappings[type];
+  }
+  
+  // Initialize the map view and zoom level
+  map.setView([height / 2, width / 2], -2); // Center the map and adjust the initial zoom as needed
+  
+  // Update the map initially and periodically
+  updateTable();
+  setInterval(updateTable, 10000);
+  </script>
+</body>
 </html>
+    
