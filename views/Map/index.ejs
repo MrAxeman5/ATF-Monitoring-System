@@ -212,7 +212,10 @@ function updateTable() {
         const vehicleZ = (height - (parseFloat(vehicle.vZ) + height / 2)) * (height / 2118); // Flip the Z-coordinate
         const vehicleY = parseFloat(vehicle.vY) * (height / 1059); // Adjust as needed for height
 
-        if (!markers[vehicle.name]) {
+        // Create a unique identifier for the vehicle based on name and a unique field like "id"
+        const vehicleMarkerKey = `${vehicle.name}_${vehicle.id}`;
+
+        if (!markers[vehicleMarkerKey]) {
           // Create a custom marker (sprite) for each vehicle if it doesn't exist
           const vehicleSpriteMarker = L.divIcon({
             className: 'vehicle-marker',
@@ -239,15 +242,15 @@ function updateTable() {
           // Add the marker to the map
           vehicleMarker.addTo(map);
 
-          // Store the marker with a unique key
-          markers[vehicle.name] = vehicleMarker;
+          // Store the marker with the unique key
+          markers[vehicleMarkerKey] = vehicleMarker;
         } else {
           // Update the existing marker's position
-          markers[vehicle.name].setLatLng([vehicleZ, vehicleX]);
+          markers[vehicleMarkerKey].setLatLng([vehicleZ, vehicleX]);
         }
 
         // Add the vehicle's name to the set of present names
-        presentVehicleNames.add(vehicle.name);
+        presentVehicleNames.add(vehicleMarkerKey);
       });
 
       // Remove markers and rows for names that are no longer present
@@ -289,7 +292,6 @@ function getVehicleSpriteImage(type) {
     spreader:                             'images/mapsprites/tools.png',
     trailer:                              'images/mapsprites/trailers.png',
     tractor:                              'images/mapsprites/vehicles.png',
-    drivableMixerWagon:                   'images/mapsprites/vehicles.png',
     implementDynamicMountAttacher:        'images/mapsprites/tools.png',
     shovelLeveler:                        'images/mapsprites/tools.png',
     dynamicMountAttacherTrailer:          'images/mapsprites/trailers.png',
@@ -324,6 +326,7 @@ function getVehicleSpriteImage(type) {
     tractorReverseDriving:                'images/mapsprites/vehicles.png',
     dynamicMountAttacherShovelLeveler:    'images/mapsprites/tools.png',
     loaderVehicle:                        'images/mapsprites/vehicles.png',
+    drivableMixerWagon:                   'images/mapsprites/vehicles.png', // Add more mappings as needed
   };
 
   return vehicleTypeMappings[type];
@@ -334,7 +337,7 @@ map.setView([height / 2, width / 2], -2); // Center the map and adjust the initi
 
 // Update the map initially and periodically
 updateTable();
-setInterval(updateTable, 4500);
+setInterval(updateTable, 10000);
 </script>
 </body>
 </html>
