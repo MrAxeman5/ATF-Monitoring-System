@@ -219,14 +219,15 @@ app.get('/api/fetch-data-map', (req, res) => {
         });
         
         const vehicleData = vehicles.map(vehicle => {
-          const name = vehicle.$?.name;
+          const name = vehicle.$?.name.replace('.', ''); // Remove the dot from the name
           const type = vehicle.$?.type;
           const vX = vehicle.$?.x;
           const vY = vehicle.$?.y;
           const vZ = vehicle.$?.z;
           const controller = vehicle.$?.controller;
+          const category = vehicle.$?.category;
         
-          return{ name, type, vX, vY, vZ, controller }
+          return{ name, type, vX, vY, vZ, controller, category }
         })
   
         res.json({ players: playerData, vehicles: vehicleData });

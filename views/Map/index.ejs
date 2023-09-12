@@ -282,59 +282,59 @@ function updateTable() {
 
 // Function to get the sprite image for a specific vehicle type
 function getVehicleSpriteImage(type) {
-    // Define mappings of vehicle types to sprite images
-    const vehicleTypeMappings = {
-      trainTrailer:                         'images/mapsprites/train.png',
-      trainTimberTrailer:                   'images/mapsprites/train.png',
-      spreader:                             'images/mapsprites/tools.png',
-      trailer:                              'images/mapsprites/trailers.png',
-      tractor:                              'images/mapsprites/vehicles.png',
-      implementDynamicMountAttacher:        'images/mapsprites/tools.png',
-      shovelLeveler:                        'images/mapsprites/tools.png',
-      dynamicMountAttacherTrailer:          'images/mapsprites/trailers.png',
-      turnOnShovel:                         'images/mapsprites/tools.png',
-      implement:                            'images/mapsprites/tools.png',
-      windrower:                            'images/mapsprites/tools.png',
-      baleLoader:                           'images/mapsprites/trailers.png',
-      mower:                                'images/mapsprites/tools.png',
-      manureSpreader:                       'images/mapsprites/tools.png',
-      selfPropelledManureBarrel:            'images/mapsprites/vehicles.png',
-      sowingMachine:                        'images/mapsprites/tools.png',
-      roller:                               'images/mapsprites/tools.png',
-      waterTrailer:                         'images/mapsprites/trailers.png',
-      cutter:                               'images/mapsprites/tools.png',
-      forageWagon:                          'images/mapsprites/trailers.png',
-      tedder:                               'images/mapsprites/tools.png',
-      attachableFrontloader:                'images/mapsprites/vehicles.png',
-      vineHarvester:                        'images/mapsprites/vehicles.png',
-      vinePrepruner:                        'images/mapsprites/tools.png',
-      mulcher:                              'images/mapsprites/tools.png',
-      combineCutterFruitPreparer:           'images/mapsprites/vehicles.png',
-      cottonHarvester:                      'images/mapsprites/vehicles.png',
-      fertilizingSowingMachine:             'images/mapsprites/tools.png',
-      turnOnCultivator:                     'images/mapsprites/tools.png',
-      balerWrapper:                         'images/mapsprites/tools.png',
-      bigBag:                               'images/mapsprites/bags.png',
-      combineDrivable:                      'images/mapsprites/vehicles.png',
-      plow:                                 'images/mapsprites/tools.png',
-      sprayer:                              'images/mapsprites/trailers.png',
-      pallet:                               'images/mapsprites/pallets.png',
-      teleHandler:                          'images/mapsprites/vehicles.png',
-      tractorReverseDriving:                'images/mapsprites/vehicles.png',
-      dynamicMountAttacherShovelLeveler:    'images/mapsprites/tools.png',
-      loaderVehicle:                        'images/mapsprites/vehicles.png',
-      drivableMixerWagon:                   'images/mapsprites/vehicles.png', // Add more mappings as needed
-    };
-  
-    return vehicleTypeMappings[type];
-  }
+  // Define mappings of vehicle types to sprite images
+  const vehicleTypeMappings = {
+    trainTrailer:                         'images/mapsprites/train.png',
+    trainTimberTrailer:                   'images/mapsprites/train.png',
+    spreader:                             'images/mapsprites/tools.png',
+    trailer:                              'images/mapsprites/trailers.png',
+    tractor:                              'images/mapsprites/vehicles.png',
+    drivableMixerWagon:                   'images/mapsprites/vehicles.png',
+    implementDynamicMountAttacher:        'images/mapsprites/tools.png',
+    shovelLeveler:                        'images/mapsprites/tools.png',
+    dynamicMountAttacherTrailer:          'images/mapsprites/trailers.png',
+    turnOnShovel:                         'images/mapsprites/tools.png',
+    implement:                            'images/mapsprites/tools.png',
+    windrower:                            'images/mapsprites/tools.png',
+    baleLoader:                           'images/mapsprites/trailers.png',
+    mower:                                'images/mapsprites/tools.png',
+    manureSpreader:                       'images/mapsprites/tools.png',
+    selfPropelledManureBarrel:            'images/mapsprites/vehicles.png',
+    sowingMachine:                        'images/mapsprites/tools.png',
+    roller:                               'images/mapsprites/tools.png',
+    waterTrailer:                         'images/mapsprites/trailers.png',
+    cutter:                               'images/mapsprites/tools.png',
+    forageWagon:                          'images/mapsprites/trailers.png',
+    tedder:                               'images/mapsprites/tools.png',
+    attachableFrontloader:                'images/mapsprites/vehicles.png',
+    vineHarvester:                        'images/mapsprites/vehicles.png',
+    vinePrepruner:                        'images/mapsprites/tools.png',
+    mulcher:                              'images/mapsprites/tools.png',
+    combineCutterFruitPreparer:           'images/mapsprites/vehicles.png',
+    cottonHarvester:                      'images/mapsprites/vehicles.png',
+    fertilizingSowingMachine:             'images/mapsprites/tools.png',
+    turnOnCultivator:                     'images/mapsprites/tools.png',
+    balerWrapper:                         'images/mapsprites/tools.png',
+    bigBag:                               'images/mapsprites/bags.png',
+    combineDrivable:                      'images/mapsprites/vehicles.png',
+    plow:                                 'images/mapsprites/tools.png',
+    sprayer:                              'images/mapsprites/trailers.png',
+    pallet:                               'images/mapsprites/pallets.png',
+    teleHandler:                          'images/mapsprites/vehicles.png',
+    tractorReverseDriving:                'images/mapsprites/vehicles.png',
+    dynamicMountAttacherShovelLeveler:    'images/mapsprites/tools.png',
+    loaderVehicle:                        'images/mapsprites/vehicles.png',
+  };
+
+  return vehicleTypeMappings[type];
+}
 
 // Initialize the map view and zoom level
 map.setView([height / 2, width / 2], -2); // Center the map and adjust the initial zoom as needed
 
 // Update the map initially and periodically
 updateTable();
-setInterval(updateTable, 10000);
+setInterval(updateTable, 4500);
 </script>
 </body>
 </html>
