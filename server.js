@@ -182,8 +182,7 @@ app.get('/api/fetch-data-map', (req, res) => {
         const slots = jsonData.Server?.Slots?.[0] || {};
         const players = slots.Player || [];
         const vehicles = jsonData.Server?.Vehicles?.[0]?.Vehicle || [];
-        const slotCount = slots.$?.capacity
-        const playersOnline = slots.$?.numUsed
+      
   
         // Create maps to store player positions and vehicle positions
         const playerPositionMap = {};
@@ -230,10 +229,16 @@ app.get('/api/fetch-data-map', (req, res) => {
           const controller = vehicle.$?.controller;
           const category = vehicle.$?.category;
         
-          return{ name, type, vX, vY, vZ, controller, category, slotCount, playersOnline }
+          return{ name, type, vX, vY, vZ, controller, category,}
+        })
+        const slotData = slots.map(slot =>{
+          const slotCount = slots.$?.capacity
+          const playersOnline = slots.$?.numUsed
+
+          return{slotCount, playersOnline}
         })
   
-        res.json({ players: playerData, vehicles: vehicleData });
+        res.json({ players: playerData, vehicles: vehicleData, slots: slotData });
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
           dcnotifacation( "ERROR",  parseError)
