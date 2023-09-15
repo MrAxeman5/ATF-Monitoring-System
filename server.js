@@ -230,7 +230,7 @@ app.get('/api/fetch-data-map', (req, res) => {
           const controller = vehicle.$?.controller;
           const category = vehicle.$?.category;
         
-          return{ name, type, vX, vY, vZ, controller, category, slotcount }
+          return{ name, type, vX, vY, vZ, controller, category, slotCount, playersOnline }
         })
   
         res.json({ players: playerData, vehicles: vehicleData });
