@@ -182,6 +182,7 @@ app.get('/api/fetch-data-map', (req, res) => {
         const slots = jsonData.Server?.Slots?.[0] || {};
         const players = slots.Player || [];
         const vehicles = jsonData.Server?.Vehicles?.[0]?.Vehicle || [];
+        const slotcount = slots.numUsed
   
         // Create maps to store player positions and vehicle positions
         const playerPositionMap = {};
@@ -228,7 +229,7 @@ app.get('/api/fetch-data-map', (req, res) => {
           const controller = vehicle.$?.controller;
           const category = vehicle.$?.category;
         
-          return{ name, type, vX, vY, vZ, controller, category }
+          return{ name, type, vX, vY, vZ, controller, category, slotcount }
         })
   
         res.json({ players: playerData, vehicles: vehicleData });
