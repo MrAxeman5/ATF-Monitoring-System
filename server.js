@@ -214,8 +214,9 @@ app.get('/api/fetch-data-map', (req, res) => {
           const name = player._;
           const isAdmin = player.$?.isAdmin;
           const position = vehiclePositionMap[name] || playerPositionMap[name];
+          const uptime = secondsToHoursMinutes(parseInt(player.$?.uptime))
           
-          return { name, position, isAdmin,};
+          return { name, position, isAdmin, uptime};
         });
         
         const vehicleData = vehicles.map(vehicle => {
@@ -248,54 +249,7 @@ app.get('/api/fetch-data-map', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  fs.readFile('data.json', 'utf-8', (err, data) => {
-    if (err) {
-      console.error('Error reading JSON file:', err);
-      dcnotifacation( "ERROR",  err)
-      fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
-      smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error reading JSON file: ' +  err)
-      res.render('error', { message: 'Error reading JSON file' });
-      return;
-    }
-
-    try {
-      const jsonData = JSON.parse(data);
-      const server = jsonData.Server;
-      if (!server || !Array.isArray(server.Slots) || server.Slots.length === 0) {
-        console.error('No server data or Slots array found in JSON.');
-        res.render('error', { message: 'No server data or Slots array found in JSON' });
-        dcnotifacation( "ERROR", 'No server data or Slots array found in JSON' )
-        fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No server data or Slots array found in JSON')
-        smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No server data or Slots array found in JSON')
-        return;
-      }
-
-      const slots = server.Slots[0];
-      if (!Array.isArray(slots.Player) || slots.Player.length === 0) {
-        console.error('No Player array found in JSON.');
-        dcnotifacation( "ERROR",  'No Player array found in JSON.')
-        fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No Player data found in JSON')
-        smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'No Player data found in JSON')
-        res.render('error', { message: 'No Player array found in JSON' });
-        return;
-      }
-
-      const players = slots.Player.filter(player => player.$?.isUsed === 'true');
-      const playerData = players.map(player => ({
-        name: player._,
-        uptime: player.$?.uptime,
-        isAdmin: player.$?.isAdmin,
-      }));
-
-      res.render('index', { players: playerData });
-    } catch (parseError) {
-      console.error('Error parsing JSON data:', parseError);
-      dcnotifacation( "ERROR",  parseError)
-      fs.appendFile('errlog.txt','[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
-      smsNotifacation('[' +  new Date + ']'+'('+new Date().toLocaleTimeString()+')' +'Error parsing JSON data: ' +  parseError)
-      res.send( 'Error parsing JSON data');
-    }
-  });
+  res.render("Map/index.ejs")
 });
 
 app.get('/map', (req, res) => {
