@@ -205,6 +205,12 @@ function updateTable() {
     .then(response => response.json())
     .then(data => {
       const playerTableBody = document.getElementById('player-table-body');
+      // Update slotCount and playersOnline
+      const slotCount = document.getElementById('slotCount');
+      const playersOnline = document.getElementById('playersOnline');
+      
+      slotCount.textContent = `Slot Count: ${slots.slotCount}`;
+      playersOnline.textContent = `Players Online: ${slots.playersOnline}`;
 
       // Store the names of players and vehicles that are currently present in the updated data
       const presentPlayerNames = new Set();
@@ -424,12 +430,6 @@ const closeButton = playerInfoCard.querySelector('.close-button');
       // Update the last update timestamp
       const lastUpdate = document.getElementById('last-update');
       lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
-      // Update the last update timestamp
-      const playersOnline = document.getElementById('playersOnline');
-      playersOnline.textContent = data.slots.playersOnline;
-      // Update the last update timestamp
-      const slotCount = document.getElementById('slotCount');
-      slotCount.textContent = data.slots.slotCount;
     })
     .catch(error => {
       console.error('Error updating table:', error);
