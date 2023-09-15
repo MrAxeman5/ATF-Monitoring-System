@@ -214,7 +214,7 @@ app.get('/api/fetch-data-map', (req, res) => {
           const name = player._;
           const isAdmin = player.$?.isAdmin;
           const position = vehiclePositionMap[name] || playerPositionMap[name];
-          const uptime = secondsToHoursMinutes(parseInt(player.$?.uptime))
+          const uptime = secondsToHoursMinutes(parseInt(player.$?.uptime));
           
           return { name, position, isAdmin, uptime};
         });

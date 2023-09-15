@@ -161,6 +161,8 @@
 <hr>
             <div class="card p-3 border-left-primary">
                 <div id="last-update"></div>
+                <div id="playersOnline"><p>Players Online:</p></div>
+                <div id="slotCount"><p>No. Of Slots:</p></div>
                 <!-- This is the last update timestamp -->
             </div>
           </div>
@@ -207,7 +209,8 @@ function updateTable() {
       // Store the names of players and vehicles that are currently present in the updated data
       const presentPlayerNames = new Set();
       const presentVehicleNames = new Set();
-
+      const slotCount = data.players.slotCount = new Set();
+      const playersOnline = data.players.playersOnline = new Set();
       data.players.forEach(player => {
         if (player.position) {
           // Translate player coordinates to pixel positions on the map
@@ -277,6 +280,7 @@ if (playerRows.has(player.name)) {
       });
 
 
+
 // Set the initial zoom level and zoom increment
 let initialZoom = -2; // Adjust the initial zoom level as needed
 let zoomIncrement = 3; // Adjust the zoom increment as needed
@@ -286,9 +290,22 @@ document.querySelectorAll('#player-table-body tr').forEach(function (row) {
   row.addEventListener('click', function () {
     const playerName = row.querySelector('.player-name').textContent;
     const playerMarker = markers[playerName];
+    // Check if the player is in a vehicle
+    const playerInVehicle = isPlayerInVehicle(playerName, data.vehicles);
 
+    // Find the vehicle associated with the player
+    let playerVehicle = '';
+    if (playerInVehicle) {
+      const vehicle = data.vehicles.find(vehicle => vehicle.controller === playerName);
+      if (vehicle) {
+        playerVehicle = vehicle.name;
+      }
+    }
     // Define playerGroup inside the click event listener
     const playerGroup = data.players.find(player => player.name === playerName)?.isAdmin === "true" ? 'Admin' : 'Player';
+    const playerUptime = data.players.find(player => player.name === playerName)?.uptime;
+    const playerPosX = data.players.find(player => player.name === playerName)?.position.x;
+    const playerPosZ = data.players.find(player => player.name === playerName)?.position.z;
 
     if (playerMarker) {
       // Zoom to the player's sprite with an adjusted zoom level
@@ -299,8 +316,17 @@ document.querySelectorAll('#player-table-body tr').forEach(function (row) {
       playerInfoCard.classList.add('card');
       playerInfoCard.innerHTML = `
         <div class="card-body border-left-primary">
-          <h5 class="card-title">${playerName}</h5>
+          <h5 class="card-title text-primary">${playerName}</h5>
+          <hr>
           <p class="card-text">Permission Group: ${playerGroup}</p>
+          <p class="card-text">Uptime: ${playerUptime}</p>
+          <p class="card-text">In Vehicle: ${playerInVehicle ? 'Yes' : 'No'}</p>
+          <p class="card-text">Vehicle: ${playerInVehicle ? playerVehicle : 'N/a'}</p>
+          <div class="card-footer">
+            <h5 class="card-title text-primary">Location</h5>
+            <p class="card-text">X: ${playerPosX}</p>
+            <p class="card-text">Z: ${playerPosZ}</p>
+          </div>
         </div>
       `;
 
@@ -448,7 +474,14 @@ function getVehicleSpriteImage(type) {
 
   return vehicleTypeMappings[type];
 }
-
+function isPlayerInVehicle(playerName, vehicles) {
+  for (const vehicle of vehicles) {
+    if (vehicle.controller === playerName) {
+      return true;
+    }
+  }
+  return false;
+}
 // Initialize the map view and zoom level
 map.setView([height / 2, width / 2], -2); // Center the map and adjust the initial zoom as needed
 
