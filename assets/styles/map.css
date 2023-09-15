@@ -7963,13 +7963,12 @@ html, body {
 [data-bs-theme="light"] table {
     background-color: #6c757d;
     border-radius: 12px;
-    padding: 3%;
+
 } 
 
 [data-bs-theme="dark"] table{
     background-color: #11141C;
     border-radius: 12px;
-    padding: 3%;
 }
 
 
@@ -7986,7 +7985,7 @@ html, body {
     transition: 0.3s;
     color: #000;
     } 
-    [data-bs-theme="dark"] .card {
+[data-bs-theme="dark"] .card {
         color-scheme: dark;        
         position: relative;
         display: flex;
