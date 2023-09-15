@@ -209,8 +209,6 @@ function updateTable() {
       // Store the names of players and vehicles that are currently present in the updated data
       const presentPlayerNames = new Set();
       const presentVehicleNames = new Set();
-      const slotCount = data.players.slotCount = new Set();
-      const playersOnline = data.players.playersOnline = new Set();
       data.players.forEach(player => {
         if (player.position) {
           // Translate player coordinates to pixel positions on the map
@@ -327,9 +325,15 @@ document.querySelectorAll('#player-table-body tr').forEach(function (row) {
             <p class="card-text">X: ${playerPosX}</p>
             <p class="card-text">Z: ${playerPosZ}</p>
           </div>
+          <button class="btn btn-danger close-button">Close</button>
         </div>
       `;
-
+// Close button event listener
+const closeButton = playerInfoCard.querySelector('.close-button');
+      closeButton.addEventListener('click', function () {
+        // Remove the player information card when the close button is clicked
+        playerInfoContainer.removeChild(playerInfoCard);
+      });
       // Clear any previously displayed player info
       const playerInfoContainer = document.getElementById('player-info');
       playerInfoContainer.innerHTML = '';
@@ -420,6 +424,12 @@ document.querySelectorAll('#player-table-body tr').forEach(function (row) {
       // Update the last update timestamp
       const lastUpdate = document.getElementById('last-update');
       lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+      // Update the last update timestamp
+      const playersOnline = document.getElementById('playersOnline');
+      playersOnline.textContent = data.slots.playersOnline;
+      // Update the last update timestamp
+      const slotCount = document.getElementById('slotCount');
+      slotCount.textContent = data.slots.slotCount;
     })
     .catch(error => {
       console.error('Error updating table:', error);
