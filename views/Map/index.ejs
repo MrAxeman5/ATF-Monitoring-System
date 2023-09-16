@@ -75,12 +75,12 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home </a>
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Link</a>
+                        <a class="nav-link" href="#">Manage</a>
                     </li>
-                    <li class="nav-item dropdown">
+                    <!-- <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
                             Dropdown
@@ -91,7 +91,7 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Something else here</a></li>
                         </ul>
-                    </li>
+                    </li> -->
 
                 </ul>
                 <li class="nav-item" style="list-style-type: none;">
@@ -143,26 +143,44 @@
     <div id="container">
         <!-- Bootstrap Sidebar -->
         <div id="sidebar">
-
+<div class="card p-3 border-left-purple">
             <table class="table">
                 <thead>
                     <tr>
-                        <th colspan="4">Player Information</th>
-                    </tr>
-                    <tr>
-                        <th>Players</th>
+                        <th colspan="4" class="h5 text-purple">Players:</th>
                     </tr>
                 </thead>
                 <tbody id="player-table-body">
+                  <tr>
+                  <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user"></i> Placeholderafwaawfwa</td>
+                </tr>
+                <tr>
+                  <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user"></i> Placeholderwdwadwdwd</td>
+                </tr>
                     <!-- Player data will be inserted here dynamically -->
                 </tbody>
             </table>
+          </div>
             <div id="player-info"></div>
 <hr>
             <div class="card p-3 border-left-primary">
                 <div id="last-update"></div>
                 <div id="playersOnline"><p>Players Online:</p></div>
                 <div id="slotCount"><p>No. Of Slots:</p></div>
+                <!-- This is the last update timestamp -->
+            </div>
+<hr>
+            <div class="card p-3 border-left-orange">
+                <div class="card-header text-orange p-1 h5">Key</div>
+                <div class="row p-3">
+                <i class="sprite-marker" style="cursor: default;"></i> ~ Player Marker
+              </div>
+              <div class="row p-3">
+                <i class="sprite-marker-admin" style="cursor: default;"></i> ~ Admin Marker
+              </div>
+              <div class="row p-3">
+                <i class="vehicle-marker" style="cursor: default;"></i> ~ Vehicle Marker
+              </div>
                 <!-- This is the last update timestamp -->
             </div>
           </div>
@@ -206,11 +224,6 @@ function updateTable() {
     .then(data => {
       const playerTableBody = document.getElementById('player-table-body');
       // Update slotCount and playersOnline
-      const slotCount = document.getElementById('slotCount');
-      const playersOnline = document.getElementById('playersOnline');
-      
-      slotCount.textContent = `Slot Count: ${slots.slotCount}`;
-      playersOnline.textContent = `Players Online: ${slots.playersOnline}`;
 
       // Store the names of players and vehicles that are currently present in the updated data
       const presentPlayerNames = new Set();
@@ -265,13 +278,14 @@ if (playerRows.has(player.name)) {
   // Update the existing row with new coordinates
   const playerRow = playerRows.get(player.name);
   playerRow.innerHTML = `
-  <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+  <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
   `;
 } else {
   // Create a new row for the player in the sidebar
   const playerInfo = document.createElement('tr');
   playerInfo.innerHTML = `
-    <td class="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+    <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
+
   `;
   playerTableBody.appendChild(playerInfo);
   playerRows.set(player.name, playerInfo);
@@ -287,7 +301,7 @@ if (playerRows.has(player.name)) {
 
 // Set the initial zoom level and zoom increment
 let initialZoom = -2; // Adjust the initial zoom level as needed
-let zoomIncrement = 3; // Adjust the zoom increment as needed
+let zoomIncrement = 1; // Adjust the zoom increment as needed
 
 // Add event listeners for table row clicks
 document.querySelectorAll('#player-table-body tr').forEach(function (row) {
@@ -430,6 +444,12 @@ const closeButton = playerInfoCard.querySelector('.close-button');
       // Update the last update timestamp
       const lastUpdate = document.getElementById('last-update');
       lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
+      const slotCount = document.getElementById('slotCount');
+      const playersOnline = document.getElementById('playersOnline');
+      
+      slotCount.textContent = `Slot Count: ${data.slots.slotCount}`;
+      playersOnline.textContent = `Players Online: ${data.slots.playersOnline}`;
+
     })
     .catch(error => {
       console.error('Error updating table:', error);
@@ -493,7 +513,7 @@ function isPlayerInVehicle(playerName, vehicles) {
   return false;
 }
 // Initialize the map view and zoom level
-map.setView([height / 2, width / 2], -2); // Center the map and adjust the initial zoom as needed
+map.setView([height / 2, width / 2], -1.5); // Center the map and adjust the initial zoom as needed
 
 // Update the map initially and periodically
 updateTable();

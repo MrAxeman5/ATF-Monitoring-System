@@ -182,7 +182,8 @@ app.get('/api/fetch-data-map', (req, res) => {
         const slots = jsonData.Server?.Slots?.[0] || {};
         const players = slots.Player || [];
         const vehicles = jsonData.Server?.Vehicles?.[0]?.Vehicle || [];
-      
+        const capacity = jsonData.Server?.Slots?.[0]?.$?.capacity  ;
+        const numUsed = jsonData.Server?.Slots?.[0]?.$?.numUsed  ;
   
         // Create maps to store player positions and vehicle positions
         const playerPositionMap = {};
@@ -209,7 +210,7 @@ app.get('/api/fetch-data-map', (req, res) => {
             vehiclePositionMap[controller] = { x, y, z};
           }
         });
-  
+
         // Prepare the data to send to the client
         const playerData = players.map(player => {
           const name = player._;
@@ -231,12 +232,10 @@ app.get('/api/fetch-data-map', (req, res) => {
         
           return{ name, type, vX, vY, vZ, controller, category,}
         })
-        const slotData = slots.map(slot =>{
-          const slotCount = slots.$?.capacity
-          const playersOnline = slots.$?.numUsed
-
-          return{slotCount, playersOnline}
-        })
+        const slotData = {
+          slotCount: capacity,
+          playersOnline: numUsed,
+        };
   
         res.json({ players: playerData, vehicles: vehicleData, slots: slotData });
       } catch (parseError) {

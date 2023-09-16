@@ -21,7 +21,20 @@
 }
 
 /*# sourceMappingURL=styles.css.map */
-
+.text-white {
+    color: #fff !important;
+  }
+  .text-orange {
+    color: #fd7e14 !important;
+  }
+  
+  .text-purple {
+    color: #6f42c1 !important;
+  }
+  .text-pink {
+    color: #e83e8c !important;
+  }
+  
 
 
 html, body {
@@ -63,12 +76,15 @@ html, body {
 [data-bs-theme="light"] #map {
     width: 100%;
     height: 100%;
+    border-radius: 12px;
     }
 
 [data-bs-theme="dark"] #map{
     width: 100%;
     height: 100%;
     background-color: #121212 !important;
+    border-radius: 12px;
+
 }
 
 .leaflet-container img.leaflet-image-layer{
@@ -81,17 +97,32 @@ html, body {
     right: 10px;
     z-index: 5;
 }
+table{
+    border-collapse: separate;
+    border-spacing: 20px 0;
+}
+td{
+    transition: ease-in-out 0.2s;
+}
+
+td:hover{
+    cursor: pointer;
+    background-color: #6f42c1;
+    transition: 0.2s ease-in-out;
+    color: #fff;
+    border-radius: 6px;
+}
+
 
 [data-bs-theme="light"] table {
-    background-color: #6c757d;
-    border-radius: 12px;
-    border-spacing: 30px !important;
+    border-radius: 12px !important;
+    border-spacing: 10px !important;
 } 
 
 [data-bs-theme="dark"] table {
-    background-color: #11141C;
-    border-radius: 12px;
-    border-spacing: 30px !important;
+    --bs-table-bg: transparent !important;
+    border-radius: 12px !important;
+    border-spacing: 10px !important;
 }
 
 [data-bs-theme="light"] .card {
@@ -123,6 +154,8 @@ html, body {
     }
  .leaflet-container{
     background: transparent !important;
+    border-radius: 12px;
+
   }
   .border-left-primary {
     border-left: 0.26rem solid #0437b4 !important;
