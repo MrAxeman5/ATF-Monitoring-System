@@ -182,6 +182,8 @@ app.get('/api/fetch-data-map', (req, res) => {
         const slots = jsonData.Server?.Slots?.[0] || {};
         const players = slots.Player || [];
         const vehicles = jsonData.Server?.Vehicles?.[0]?.Vehicle || [];
+        const farmlands = jsonData.Farmlands?.[0]?.Farmland || [];
+        const fields = jsonData.Fields?.[0]?.Field || [];
         const capacity = jsonData.Server?.Slots?.[0]?.$?.capacity  ;
         const numUsed = jsonData.Server?.Slots?.[0]?.$?.numUsed  ;
   
@@ -232,12 +234,31 @@ app.get('/api/fetch-data-map', (req, res) => {
         
           return{ name, type, vX, vY, vZ, controller, category,}
         })
+        const farmlandData = farmlands.map(Farmland => {
+          const name = Farmland.$?.name.replace('.', ''); // Remove the dot from the name
+          const id = Farmland.$?.id;
+          const owner = Farmland.$?.owner;
+          const area = Farmland.$?.area;
+          const farmlandX = Farmland.$?.x;
+          const farmlandY = Farmland.$?.y;
+          const farmlandZ = Farmland.$?.z;
+        
+          return{ name, id, owner, area, farmlandX, farmlandY, farmlandZ,}
+        })
+        const fieldData = fields.map(Field => {
+          const id = Field.$?.id;
+          const fieldX = Field.$?.x;
+          const fieldZ = Field.$?.z;
+          const isOwned = Field.$?.isOwned;
+        
+          return{id, fieldX, fieldZ, isOwned,}
+        })
         const slotData = {
           slotCount: capacity,
           playersOnline: numUsed,
         };
   
-        res.json({ players: playerData, vehicles: vehicleData, slots: slotData });
+        res.json({ players: playerData, vehicles: vehicleData, slots: slotData, farmlands: farmlandData, fields: fieldData, });
       } catch (parseError) {
           console.error('Error parsing JSON data:', parseError);
           dcnotifacation( "ERROR",  parseError)

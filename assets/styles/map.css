@@ -54,7 +54,7 @@ html, body {
     
 }
 #topbar{
-    position: fixed;
+    position: sticky;
     z-index: 2;
 }
 
@@ -64,6 +64,8 @@ html, body {
     padding: 20px;
     color: #fff;
     background-color: #F0F0F0;
+    position: sticky;
+
 }
 [data-bs-theme="dark"] #sidebar {
     width: 30%;
@@ -71,24 +73,28 @@ html, body {
     padding: 20px;
     color: #fff;
     background-color: #1E1E1E;
-}
+    position: sticky;
+  }
 
 [data-bs-theme="light"] #map {
     width: 100%;
-    height: 100%;
+    height: 90%;
     border-radius: 12px;
     }
 
 [data-bs-theme="dark"] #map{
     width: 100%;
-    height: 100%;
+    height: 90%;
     background-color: #121212 !important;
     border-radius: 12px;
 
 }
-
+.leaflet-control-attribution{
+  display: none !important;
+}
 .leaflet-container img.leaflet-image-layer{
     border-radius: 12px !important;
+    box-shadow: 0 0.15rem 0.95rem 0.12rem rgba(4,55,180, 0.25) !important;
 }    
 
 #slider {
@@ -101,18 +107,31 @@ table{
     border-collapse: separate;
     border-spacing: 20px 0;
 }
-td{
-    transition: ease-in-out 0.2s;
+td {
+  transition: ease-in-out 0.2s;
+  font-weight: bold;
+  background-color: #1E1E1E !important;
+  border: 0;
+  margin-left: 5%;
 }
 
-td:hover{
-    cursor: pointer;
-    background-color: #6f42c1;
-    transition: 0.2s ease-in-out;
-    color: #fff;
-    border-radius: 6px;
+td:hover {
+  cursor: pointer;
+  background-color: #6f42c1 !important;
+  transition: 0.2s ease-in-out;
+  color: #ffffff !important;
+  border-radius: 6px;
 }
 
+td i {
+  color: #6f42c1;
+  transition: color 0.2s ease-in-out; 
+  
+}
+
+td:hover i {
+  color: #ffffff;
+}
 
 [data-bs-theme="light"] table {
     border-radius: 12px !important;
@@ -230,4 +249,7 @@ td:hover{
   .border-bottom-dark {
     border-bottom: 0.25rem solid #5a5c69 !important;
   }
-  
+  .scroll {
+    max-height: 200px;
+    overflow-y: auto;
+}

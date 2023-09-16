@@ -65,7 +65,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">ATF Monitoring System</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -107,25 +107,17 @@
                             style="--bs-dropdown-min-width: 8rem;">
                             <li>
                                 <button type="button" class="dropdown-item d-flex align-items-center"
-                                    data-bs-theme-value="light">
-                                    <svg class="bi me-2 opacity-50 theme-icon"><use href="#sun-fill"></use></svg>
-                                    Light
-                                    <svg class="bi ms-auto d-none"><use href="#check2"></use></svg>
-                                </button>
+                                    data-bs-theme-value="light"><i class="fa fa-sun" style="color: yellow !important; margin-right: 4px;"></i>Light</button>
                             </li>
                             <li>
                                 <button type="button" class="dropdown-item d-flex align-items-center"
-                                    data-bs-theme-value="dark">
-                                    <svg class="bi me-2 opacity-50 theme-icon"><use href="#moon-stars-fill"></use></svg>
-                                    Dark
-                                    <svg class="bi ms-auto d-none"><use href="#check2"></use></svg>
+                                    data-bs-theme-value="dark"><i class="fas fa-moon" style="color: yellow !important; margin-right: 4px;"></i>Dark
                                 </button>
                             </li>
                             <li>
                                 <button type="button" class="dropdown-item d-flex align-items-center active"
                                     data-bs-theme-value="auto">
-                                    <svg class="bi me-2 opacity-50 theme-icon"><use href="#circle-half"></use></svg>
-                                    Auto
+                                    <i class="fas fa-magic"style="margin-right: 4px;"></i> Auto
                                     <svg class="bi ms-auto d-none"><use href="#check2"></use></svg>
                                 </button>
                             </li>
@@ -143,11 +135,18 @@
     <div id="container">
         <!-- Bootstrap Sidebar -->
         <div id="sidebar">
-<div class="card p-3 border-left-purple">
+<div class="card p-3 border-left-purple scroll">
             <table class="table">
                 <thead>
                     <tr>
+                      <div class="row">
+                        <div class="col">
+                          <a href="" rel="noopener noreferrer"><i class="fa fa-sync"></i></a>
+                      </div>
+                      <div class="col">
                         <th colspan="4" class="h5 text-purple">Players:</th>
+                      </div>
+                      </div>
                     </tr>
                 </thead>
                 <tbody id="player-table-body">
@@ -160,11 +159,11 @@
             <div class="card p-3 border-left-primary">
                 <div id="last-update"></div>
                 <div id="playersOnline"><p>Players Online:</p></div>
-                <div id="slotCount"><p>No. Of Slots:</p></div>
+                <div id="slotCount"><p>Max Players:</p></div>
                 <!-- This is the last update timestamp -->
             </div>
 <hr>
-            <div class="card p-3 border-left-orange">
+            <div class="card p-3 border-left-orange scroll">
                 <div class="card-header text-orange p-1 h5">Key</div>
                 <div class="row p-3">
                 <i class="sprite-marker" style="cursor: default;"></i> ~ Player Marker
@@ -272,15 +271,12 @@ if (playerRows.has(player.name)) {
   // Update the existing row with new coordinates
   const playerRow = playerRows.get(player.name);
   playerRow.innerHTML = `
-  <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
-  `;
+  <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="far fa-user-circle"></i> ${player.name}</td>`;
 } else {
   // Create a new row for the player in the sidebar
   const playerInfo = document.createElement('tr');
   playerInfo.innerHTML = `
-    <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
-
-  `;
+    <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="far fa-user-circle"></i> ${player.name}</td>`;
   playerTableBody.appendChild(playerInfo);
   playerRows.set(player.name, playerInfo);
 }
@@ -441,7 +437,7 @@ const closeButton = playerInfoCard.querySelector('.close-button');
       const slotCount = document.getElementById('slotCount');
       const playersOnline = document.getElementById('playersOnline');
       
-      slotCount.textContent = `Slot Count: ${data.slots.slotCount}`;
+      slotCount.textContent = `Max Players: ${data.slots.slotCount}`;
       playersOnline.textContent = `Players Online: ${data.slots.playersOnline}`;
 
     })
