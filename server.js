@@ -1,4 +1,8 @@
 require('dotenv').config();
+const phpExpress = require('php-express')({
+  binPath: 'php', // Path to your PHP binary
+  router: 'path-to-your-php-router.php', // Path to your PHP router script
+});
 const express = require('express');
 const client = require('twilio')(
   process.env.TWILIO_ACCOUNT_SID,
@@ -47,6 +51,7 @@ const axios = require('axios');
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.use(express.static('assets'));
+app.all(/\.php$/, phpExpress.router);
 
 // Middleware
 app.use(express.json());
