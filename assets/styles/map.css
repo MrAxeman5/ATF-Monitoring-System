@@ -103,11 +103,15 @@ html, body {
     right: 10px;
     z-index: 5;
 }
-table{
-    border-collapse: separate;
-    border-spacing: 20px 0;
+
+[data-bs-theme="light"] tr {
+  transition: ease-in-out 0.2s;
+  font-weight: bold;
+  background-color: #e9ecef !important;
+  border: 0;
+  margin-left: 5%;
 }
-td {
+[data-bs-theme="dark"] tr {
   transition: ease-in-out 0.2s;
   font-weight: bold;
   background-color: #1E1E1E !important;
@@ -115,21 +119,35 @@ td {
   margin-left: 5%;
 }
 
-td:hover {
+#playerTable tr:hover {
   cursor: pointer;
   background-color: #6f42c1 !important;
   transition: 0.2s ease-in-out;
   color: #ffffff !important;
   border-radius: 6px;
 }
+#fields-table tr:hover {
+  cursor: pointer;
+  background-color: #198754 !important;
+  transition: 0.2s ease-in-out;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+#farmlands-table tr:hover {
+  cursor: pointer;
+  background-color: #e83e8c !important;
+  transition: 0.2s ease-in-out;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
 
-td i {
+tr i {
   color: #6f42c1;
   transition: color 0.2s ease-in-out; 
   
 }
 
-td:hover i {
+tr:hover i {
   color: #ffffff;
 }
 
@@ -251,5 +269,9 @@ td:hover i {
   }
   .scroll {
     max-height: 200px;
+    overflow-y: auto;
+}
+  .scroll-players {
+    max-height: 50%;
     overflow-y: auto;
 }

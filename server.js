@@ -182,8 +182,8 @@ app.get('/api/fetch-data-map', (req, res) => {
         const slots = jsonData.Server?.Slots?.[0] || {};
         const players = slots.Player || [];
         const vehicles = jsonData.Server?.Vehicles?.[0]?.Vehicle || [];
-        const farmlands = jsonData.Farmlands?.[0]?.Farmland || [];
-        const fields = jsonData.Fields?.[0]?.Field || [];
+        const farmlands = jsonData.Server.Farmlands?.[0]?.Farmland || [];
+        const fields = jsonData.Server.Fields?.[0]?.Field || [];        
         const capacity = jsonData.Server?.Slots?.[0]?.$?.capacity  ;
         const numUsed = jsonData.Server?.Slots?.[0]?.$?.numUsed  ;
   
