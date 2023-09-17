@@ -254,36 +254,38 @@
       // Declare height and width variables for your image
       var height = 2118; // Adjust to match the height of your image
       var width = 2148; // Adjust to match the width of your image
-      
+    
       // Vehicle offsets (adjust as needed)
       var vehicleOffsetX = 0;
       var vehicleOffsetZ = 0;
-      
+    
       // Create the Leaflet map with maxBounds option
       var map = L.map('map', {
         maxZoom: 5, // Adjust the maximum zoom level as needed
         minZoom: -2,
         crs: L.CRS.Simple,
       });
-      
+    
       // Add a custom image as the map
       var imageUrl = '../images/map.png'; // Adjust the path to your image
       var imageBounds = [[0, 0], [height, width]]; // Adjust the bounds of your image (height and width)
       L.imageOverlay(imageUrl, imageBounds).addTo(map);
-      
+    
       // Initialize the MousePosition control to display coordinates
       L.control.mousePosition().addTo(map);
-      
+    
       // Create an object to store markers
       const markers = {};
-      
+    
       // Create a map to store player names and their corresponding rows
       const playerRows = new Map();
+    
       // Function to convert square meters to hectares
-function convertAreaToHectares(areaInSquareMeters) {
-  const areaInHectares = areaInSquareMeters / 10000; // 1 hectare = 10,000 square meters
-  return areaInHectares.toFixed(2); // Round to 2 decimal places
-}
+      function convertAreaToHectares(areaInSquareMeters) {
+        const areaInHectares = areaInSquareMeters / 10000; // 1 hectare = 10,000 square meters
+        return areaInHectares.toFixed(2); // Round to 2 decimal places
+      }
+    
       // Updated updateTable function
       function updateTable() {
         fetch('/api/fetch-data-map')
@@ -291,7 +293,7 @@ function convertAreaToHectares(areaInSquareMeters) {
           .then(data => {
             const playerTableBody = document.getElementById('player-table-body');
             // Update slotCount and playersOnline
-      
+    
             // Store the names of players and vehicles that are currently present in the updated data
             const presentPlayerNames = new Set();
             const presentVehicleNames = new Set();
@@ -301,11 +303,10 @@ function convertAreaToHectares(areaInSquareMeters) {
                 const pixelX = (parseFloat(player.position.x) + width / 2) * (width / 2148); // Adjust as needed
                 const pixelZ = (height - (parseFloat(player.position.z) + height / 2)) * (height / 2118); // Flip the Z-coordinate
                 const pixelY = parseFloat(player.position.y) * (height / 1059); // Adjust as needed for height
-      
+    
                 // Determine the CSS class for the sprite marker based on admin status
-                
                 const spriteMarkerClass = player.isAdmin && player.isAdmin.toLowerCase() === "true" ? 'sprite-marker-admin' : 'sprite-marker';
-      
+    
                 if (!markers[player.name]) {
                   // Create a custom marker (sprite) for each player if it doesn't exist
                   const spriteMarker = L.divIcon({
@@ -313,142 +314,141 @@ function convertAreaToHectares(areaInSquareMeters) {
                     iconSize: [32, 32], // Size of the sprite (adjust as needed)
                     iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
                   });
-      
+    
                   // Create a marker with the sprite icon
                   const marker = L.marker([pixelZ, pixelX], {
                     icon: spriteMarker,
                   });
-      
+    
                   // Create a tooltip for the marker (player's name)
                   const tooltip = L.tooltip({
                     permanent: true,
                     direction: 'right',
                     offset: [16, 0], // Adjust the tooltip position as needed
                   }).setContent(player.name);
-      
+    
                   // Bind the tooltip to the marker
                   marker.bindTooltip(tooltip);
-      
+    
                   // Add the marker to the map
                   marker.addTo(map);
-      
+    
                   // Store the marker with a unique key
                   markers[player.name] = marker;
                 } else {
                   // Update the existing marker's position
                   markers[player.name].setLatLng([pixelZ, pixelX]);
                 }
-      
-      
-      // Check if a row for this player already exists in the sidebar
-      if (playerRows.has(player.name)) {
-        // Update the existing row with new coordinates
-        const playerRow = playerRows.get(player.name);
-        playerRow.innerHTML = `
-        <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user-circle"></i> ${player.name}</td>
-        `;
-      } else {
-        // Create a new row for the player in the sidebar
-        const playerInfo = document.createElement('tr');
-        playerInfo.innerHTML = `
-          <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user-circle"></i> ${player.name}</td>
-      
-        `;
-        playerTableBody.appendChild(playerInfo);
-        playerRows.set(player.name, playerInfo);
-      }
-      
-      
+    
+                // Check if a row for this player already exists in the sidebar
+                if (playerRows.has(player.name)) {
+                  // Update the existing row with new coordinates
+                  const playerRow = playerRows.get(player.name);
+                  playerRow.innerHTML = `
+                  <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user-circle"></i> ${player.name}</td>
+                  `;
+                } else {
+                  // Create a new row for the player in the sidebar
+                  const playerInfo = document.createElement('tr');
+                  playerInfo.innerHTML = `
+                    <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user-circle"></i> ${player.name}</td>
+                  `;
+                  playerTableBody.appendChild(playerInfo);
+                  playerRows.set(player.name, playerInfo);
+                }
+    
                 // Add the player's name to the set of present players
                 presentPlayerNames.add(player.name);
               }
             });
-      
-      
-      
-      // Set the initial zoom level and zoom increment
-      let initialZoom = -2; // Adjust the initial zoom level as needed
-      let zoomIncrement = 1; // Adjust the zoom increment as needed
-      
-      // Add event listeners for table row clicks
-      document.querySelectorAll('#player-table-body tr').forEach(function (row) {
-        row.addEventListener('click', function () {
-          const playerName = row.querySelector('.player-name').textContent;
-          const playerMarker = markers[playerName];
-          // Check if the player is in a vehicle
-          const playerInVehicle = isPlayerInVehicle(playerName, data.vehicles);
-      
-          // Find the vehicle associated with the player
-          let playerVehicle = '';
-          if (playerInVehicle) {
-            const vehicle = data.vehicles.find(vehicle => vehicle.controller === playerName);
-            if (vehicle) {
-              playerVehicle = vehicle.name;
-            }
-          }
-          // Define playerGroup inside the click event listener
-          const playerGroup = data.players.find(player => player.name === playerName)?.isAdmin === "true" ? 'Admin' : 'Player';
-          const playerUptime = data.players.find(player => player.name === playerName)?.uptime;
-          const playerPosX = data.players.find(player => player.name === playerName)?.position.x;
-          const playerPosZ = data.players.find(player => player.name === playerName)?.position.z;
-      
-          if (playerMarker) {
-            // Zoom to the player's sprite with an adjusted zoom level
-            map.setView(playerMarker.getLatLng(), initialZoom + zoomIncrement);
-      
-            // Create a card for the player information
-            const playerInfoCard = document.createElement('div');
-            playerInfoCard.classList.add('hr').add('card');
-            playerInfoCard.innerHTML = `
-              <div class="card-body border-left-primary">
-                <h5 class="card-title text-primary">${playerName}</h5>
-                <hr>
-                <p class="card-text">Permission Group: ${playerGroup}</p>
-                <p class="card-text">Uptime: ${playerUptime}</p>
-                <p class="card-text">In Vehicle: ${playerInVehicle ? 'Yes' : 'No'}</p>
-                <p class="card-text">Vehicle: ${playerInVehicle ? playerVehicle : 'N/a'}</p>
-                <div class="card-footer">
-                  <h5 class="card-title text-primary">Location</h5>
-                  <p class="card-text">X: ${playerPosX}</p>
-                  <p class="card-text">Z: ${playerPosZ}</p>
-                </div>
-                <button class="btn btn-danger close-button">Close</button>
-              </div>
-            `;
-      // Close button event listener
-      const closeButton = playerInfoCard.querySelector('.close-button');
-            closeButton.addEventListener('click', function () {
-              // Remove the player information card when the close button is clicked
-              playerInfoContainer.removeChild(playerInfoCard);
+    
+            // Set the initial zoom level and zoom increment
+            let initialZoom = -2; // Adjust the initial zoom level as needed
+            let zoomIncrement = 1; // Adjust the zoom increment as needed
+    
+            // Add event listeners for table row clicks
+            document.querySelectorAll('#player-table-body tr').forEach(function (row) {
+              row.addEventListener('click', function () {
+                const playerName = row.querySelector('.player-name').textContent;
+                const playerMarker = markers[playerName];
+    
+                // Check if the player is in a vehicle
+                const playerInVehicle = isPlayerInVehicle(playerName, data.vehicles);
+    
+                // Find the vehicle associated with the player
+                let playerVehicle = '';
+                if (playerInVehicle) {
+                  const vehicle = data.vehicles.find(vehicle => vehicle.controller === playerName);
+                  if (vehicle) {
+                    playerVehicle = vehicle.name;
+                  }
+                }
+    
+                // Define playerGroup inside the click event listener
+                const playerGroup = data.players.find(player => player.name === playerName)?.isAdmin === "true" ? 'Admin' : 'Player';
+                const playerUptime = data.players.find(player => player.name === playerName)?.uptime;
+                const playerPosX = data.players.find(player => player.name === playerName)?.position.x;
+                const playerPosZ = data.players.find(player => player.name === playerName)?.position.z;
+    
+                if (playerMarker) {
+                  // Zoom to the player's sprite with an adjusted zoom level
+                  map.setView(playerMarker.getLatLng(), initialZoom + zoomIncrement);
+    
+                  // Create a card for the player information
+                  const playerInfoCard = document.createElement('div');
+                  playerInfoCard.classList.add('card', 'border-left-primary');
+                  playerInfoCard.innerHTML = `
+                    <div class="card-body">
+                      <h5 class="card-title text-primary">${playerName}</h5>
+                      <hr>
+                      <p class="card-text">Permission Group: ${playerGroup}</p>
+                      <p class="card-text">Uptime: ${playerUptime}</p>
+                      <p class="card-text">In Vehicle: ${playerInVehicle ? 'Yes' : 'No'}</p>
+                      <p class="card-text">Vehicle: ${playerInVehicle ? playerVehicle : 'N/a'}</p>
+                      <div class="card-footer">
+                        <h5 class="card-title text-primary">Location</h5>
+                        <p class="card-text">X: ${playerPosX}</p>
+                        <p class="card-text">Z: ${playerPosZ}</p>
+                      </div>
+                      <button class="btn btn-danger close-button">Close</button>
+                    </div>
+                  `;
+    
+                  // Close button event listener
+                  const closeButton = playerInfoCard.querySelector('.close-button');
+                  closeButton.addEventListener('click', function () {
+                    // Remove the player information card when the close button is clicked
+                    playerInfoCard.remove();
+                  });
+    
+                  // Clear any previously displayed player info
+                  const playerInfoContainer = document.getElementById('player-info');
+                  playerInfoContainer.innerHTML = '';
+    
+                  // Append the player info card to the container
+                  playerInfoContainer.appendChild(playerInfoCard);
+                }
+              });
             });
-            // Clear any previously displayed player info
-            const playerInfoContainer = document.getElementById('player-info');
-            playerInfoContainer.innerHTML = '';
-      
-            // Append the player info card to the container
-            playerInfoContainer.appendChild(playerInfoCard);
-          }
-        });
-      });
-            
+    
             // Handle vehicles
             data.vehicles.forEach(vehicle => {
               // Check if this vehicle type has a specific sprite image defined
               let vehicleSpriteImage = getVehicleSpriteImage(vehicle.type);
-      
+    
               if (!vehicleSpriteImage) {
                 // If no specific sprite image is defined, use a default image
                 vehicleSpriteImage = 'images/mapsprites/vehicles.png';
               }
-      
+    
               // Update the vehicle's position based on the specified offset
               const vehicleX = (parseFloat(vehicle.vX) + width / 2) * (width / 2148); // Adjust as needed
               const vehicleZ = (height - (parseFloat(vehicle.vZ) + height / 2)) * (height / 2118); // Flip the Z-coordinate
               const vehicleY = parseFloat(vehicle.vY) * (height / 1059); // Adjust as needed for height
-      
+    
               // Create a unique identifier for the vehicle based on name and a unique field like "id"
               const vehicleMarkerKey = `${vehicle.name}_${vehicle.id}`;
-      
+    
               if (!markers[vehicleMarkerKey]) {
                 // Create a custom marker (sprite) for each vehicle if it doesn't exist
                 const vehicleSpriteMarker = L.divIcon({
@@ -457,36 +457,36 @@ function convertAreaToHectares(areaInSquareMeters) {
                   iconAnchor: [16, 16], // Center of the sprite (adjust as needed)
                   html: `<img src="${vehicleSpriteImage}" alt="${vehicle.name}" width="16" height="16">`, // Use the vehicle sprite image
                 });
-      
+    
                 // Create a marker with the sprite icon
                 const vehicleMarker = L.marker([vehicleZ, vehicleX], {
                   icon: vehicleSpriteMarker,
                 });
-      
+    
                 // Create a tooltip for the marker (vehicle's name)
                 const tooltip = L.tooltip({
                   permanent: false,
                   direction: 'right',
                   offset: [16, 0], // Adjust the tooltip position as needed
                 }).setContent(vehicle.name);
-      
+    
                 // Bind the tooltip to the marker
                 vehicleMarker.bindTooltip(tooltip);
-      
+    
                 // Add the marker to the map
                 vehicleMarker.addTo(map);
-      
+    
                 // Store the marker with the unique key
                 markers[vehicleMarkerKey] = vehicleMarker;
               } else {
                 // Update the existing marker's position
                 markers[vehicleMarkerKey].setLatLng([vehicleZ, vehicleX]);
               }
-      
+    
               // Add the vehicle's name to the set of present names
               presentVehicleNames.add(vehicleMarkerKey);
             });
-      
+    
             // Remove markers and rows for names that are no longer present
             Object.keys(markers).forEach(name => {
               if (!presentPlayerNames.has(name) && !presentVehicleNames.has(name)) {
@@ -495,125 +495,83 @@ function convertAreaToHectares(areaInSquareMeters) {
                   // Remove the marker from the map
                   map.removeLayer(markers[name]);
                 }
-      
+    
                 // Check if the row still exists
                 if (playerRows.has(name)) {
                   // Remove the row from the sidebar
                   playerTableBody.removeChild(playerRows.get(name));
                 }
-      
+    
                 // Delete the marker and row from their respective data structures
                 delete markers[name];
                 playerRows.delete(name);
               }
             });
-      
+    
             // Update the last update timestamp
             const lastUpdate = document.getElementById('last-update');
             lastUpdate.textContent = 'Last Update: ' + new Date().toLocaleTimeString();
             const slotCount = document.getElementById('slotCount');
             const playersOnline = document.getElementById('playersOnline');
-            
+    
             slotCount.textContent = `Slot Count: ${data.slots.slotCount}`;
             playersOnline.textContent = `Players Online: ${data.slots.playersOnline}`;
-// Inside your updateTable function, after fetching data:
-// Update farmlands table
-const farmlandsTableBody = document.getElementById('farmlands-table').getElementsByTagName('tbody')[0];
-farmlandsTableBody.innerHTML = ''; // Clear existing rows
-
-data.farmlands.forEach(farmland => {
-  if (farmland.owner === "1") {
-    farmlandOwner = "The Green Farm";
-  } else if (farmland.owner === "2") {
-    farmlandOwner = "Trusted";
-  } else if (farmland.owner === "3") {
-    farmlandOwner = "Admin Farm";
-  } else if (farmland.owner === "0") {
-    farmlandOwner = "Not Owned";
-  }
-  
-  // Convert the area to hectares
-  const areaInHectares = convertAreaToHectares(farmland.area);
-
-  // Create and populate table rows here
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td>${farmland.id || ''}</td>
-    <td>${farmlandOwner || ''}</td>
-    <td>${areaInHectares || ''} ha</td> <!-- Display area in hectares -->
-  `;
-  farmlandsTableBody.appendChild(row);
-});
-
-// Update fields table
-const fieldsTableBody = document.getElementById('fields-table').getElementsByTagName('tbody')[0];
-fieldsTableBody.innerHTML = ''; // Clear existing rows
-
-data.fields.forEach(field => {
-  // Create and populate table rows here
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td>${field.id || ''}</td>
-    <td>${field.fieldX || ''}</td>
-    <td>${field.fieldZ || ''}</td>
-  `;
-  fieldsTableBody.appendChild(row);
-});
           })
-          
+    
           .catch(error => {
             console.error('Error updating table:', error);
           });
       }
-      
+    
       // Function to get the sprite image for a specific vehicle type
       function getVehicleSpriteImage(type) {
         // Define mappings of vehicle types to sprite images
         const vehicleTypeMappings = {
-          trainTrailer:                         'images/mapsprites/train.png',
-          trainTimberTrailer:                   'images/mapsprites/train.png',
-          spreader:                             'images/mapsprites/tools.png',
-          trailer:                              'images/mapsprites/trailers.png',
-          tractor:                              'images/mapsprites/vehicles.png',
-          implementDynamicMountAttacher:        'images/mapsprites/tools.png',
-          shovelLeveler:                        'images/mapsprites/tools.png',
-          dynamicMountAttacherTrailer:          'images/mapsprites/trailers.png',
-          turnOnShovel:                         'images/mapsprites/tools.png',
-          implement:                            'images/mapsprites/tools.png',
-          windrower:                            'images/mapsprites/tools.png',
-          baleLoader:                           'images/mapsprites/trailers.png',
-          mower:                                'images/mapsprites/tools.png',
-          manureSpreader:                       'images/mapsprites/tools.png',
-          selfPropelledManureBarrel:            'images/mapsprites/vehicles.png',
-          sowingMachine:                        'images/mapsprites/tools.png',
-          roller:                               'images/mapsprites/tools.png',
-          waterTrailer:                         'images/mapsprites/trailers.png',
-          cutter:                               'images/mapsprites/tools.png',
-          forageWagon:                          'images/mapsprites/trailers.png',
-          tedder:                               'images/mapsprites/tools.png',
-          attachableFrontloader:                'images/mapsprites/vehicles.png',
-          vineHarvester:                        'images/mapsprites/vehicles.png',
-          vinePrepruner:                        'images/mapsprites/tools.png',
-          mulcher:                              'images/mapsprites/tools.png',
-          combineCutterFruitPreparer:           'images/mapsprites/vehicles.png',
-          cottonHarvester:                      'images/mapsprites/vehicles.png',
-          fertilizingSowingMachine:             'images/mapsprites/tools.png',
-          turnOnCultivator:                     'images/mapsprites/tools.png',
-          balerWrapper:                         'images/mapsprites/tools.png',
-          bigBag:                               'images/mapsprites/bags.png',
-          combineDrivable:                      'images/mapsprites/vehicles.png',
-          plow:                                 'images/mapsprites/tools.png',
-          sprayer:                              'images/mapsprites/trailers.png',
-          pallet:                               'images/mapsprites/pallets.png',
-          teleHandler:                          'images/mapsprites/vehicles.png',
-          tractorReverseDriving:                'images/mapsprites/vehicles.png',
-          dynamicMountAttacherShovelLeveler:    'images/mapsprites/tools.png',
-          loaderVehicle:                        'images/mapsprites/vehicles.png',
-          drivableMixerWagon:                   'images/mapsprites/vehicles.png', // Add more mappings as needed
+          trainTrailer: 'images/mapsprites/train.png',
+          trainTimberTrailer: 'images/mapsprites/train.png',
+          spreader: 'images/mapsprites/tools.png',
+          trailer: 'images/mapsprites/trailers.png',
+          tractor: 'images/mapsprites/vehicles.png',
+          implementDynamicMountAttacher: 'images/mapsprites/tools.png',
+          shovelLeveler: 'images/mapsprites/tools.png',
+          dynamicMountAttacherTrailer: 'images/mapsprites/trailers.png',
+          turnOnShovel: 'images/mapsprites/tools.png',
+          implement: 'images/mapsprites/tools.png',
+          windrower: 'images/mapsprites/tools.png',
+          baleLoader: 'images/mapsprites/trailers.png',
+          mower: 'images/mapsprites/tools.png',
+          manureSpreader: 'images/mapsprites/tools.png',
+          selfPropelledManureBarrel: 'images/mapsprites/vehicles.png',
+          sowingMachine: 'images/mapsprites/tools.png',
+          roller: 'images/mapsprites/tools.png',
+          waterTrailer: 'images/mapsprites/trailers.png',
+          cutter: 'images/mapsprites/tools.png',
+          forageWagon: 'images/mapsprites/trailers.png',
+          tedder: 'images/mapsprites/tools.png',
+          attachableFrontloader: 'images/mapsprites/vehicles.png',
+          vineHarvester: 'images/mapsprites/vehicles.png',
+          vinePrepruner: 'images/mapsprites/tools.png',
+          mulcher: 'images/mapsprites/tools.png',
+          combineCutterFruitPreparer: 'images/mapsprites/vehicles.png',
+          cottonHarvester: 'images/mapsprites/vehicles.png',
+          fertilizingSowingMachine: 'images/mapsprites/tools.png',
+          turnOnCultivator: 'images/mapsprites/tools.png',
+          balerWrapper: 'images/mapsprites/tools.png',
+          bigBag: 'images/mapsprites/bags.png',
+          combineDrivable: 'images/mapsprites/vehicles.png',
+          plow: 'images/mapsprites/tools.png',
+          sprayer: 'images/mapsprites/trailers.png',
+          pallet: 'images/mapsprites/pallets.png',
+          teleHandler: 'images/mapsprites/vehicles.png',
+          tractorReverseDriving: 'images/mapsprites/vehicles.png',
+          dynamicMountAttacherShovelLeveler: 'images/mapsprites/tools.png',
+          loaderVehicle: 'images/mapsprites/vehicles.png',
+          drivableMixerWagon: 'images/mapsprites/vehicles.png', // Add more mappings as needed
         };
-      
+    
         return vehicleTypeMappings[type];
       }
+    
       function isPlayerInVehicle(playerName, vehicles) {
         for (const vehicle of vehicles) {
           if (vehicle.controller === playerName) {
@@ -622,13 +580,16 @@ data.fields.forEach(field => {
         }
         return false;
       }
+    
       // Initialize the map view and zoom level
       map.setView([height / 2, width / 2], -1.5); // Center the map and adjust the initial zoom as needed
-      
+    
       // Update the map initially and periodically
       updateTable();
       setInterval(updateTable, 10000);
-      </script>
+    </script>
+    
+    
       
 </body>
 </html>

@@ -276,13 +276,12 @@ app.get('/api/fetch-data-map', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.render("Map/index.ejs")
+  res.render("Login/index.ejs")
 });
 
 app.get('/map', (req, res) => {
   res.render("Map/index.ejs")
 });
-
 
 // Start the server
 app.listen(port, () => {
