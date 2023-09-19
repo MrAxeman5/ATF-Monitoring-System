@@ -2,7 +2,7 @@
 include 'main.php';
 // No need for the user to see the login form if they're logged-in, so redirect them to the home page
 if (isset($_SESSION['loggedin'])) {
-	// If the user is not logged in, redirect to the home page.
+	// If the user is logged in, redirect to the home page.
 	header('Location: home.php');
 	exit;
 }
@@ -41,21 +41,21 @@ if (isset($_COOKIE['rememberme']) && !empty($_COOKIE['rememberme'])) {
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,minimum-scale=1">
-		<title>Register</title>
+		<title>Login</title>
 		<link href="style.css" rel="stylesheet" type="text/css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer">
 	</head>
 	<body>
-		<div class="register">
+		<div class="login">
 
-			<h1>Register</h1>
+			<h1>Login</h1>
 
 			<div class="links">
-				<a href="index.php">Login</a>
-				<a href="register.php" class="active">Register</a>
+				<a href="index.php" class="active">Login</a>
+				<a href="register.php">Register</a>
 			</div>
 
-			<form action="register-process.php" method="post" autocomplete="off">
+			<form action="/authenticate.php" method="post">
 
 				<label for="username">
 					<i class="fas fa-user"></i>
@@ -67,19 +67,13 @@ if (isset($_COOKIE['rememberme']) && !empty($_COOKIE['rememberme'])) {
 				</label>
 				<input type="password" name="password" placeholder="Password" id="password" required>
 
-				<label for="cpassword">
-					<i class="fas fa-lock"></i>
+				<label id="rememberme">
+					<input type="checkbox" name="rememberme">Remember me
 				</label>
-				<input type="password" name="cpassword" placeholder="Confirm Password" id="cpassword" required>
-
-				<label for="email">
-					<i class="fas fa-envelope"></i>
-				</label>
-				<input type="email" name="email" placeholder="Email" id="email" required>
-
+				
 				<div class="msg"></div>
 
-				<input type="submit" value="Register">
+				<input type="submit" value="Login">
 
 			</form>
 
@@ -87,17 +81,17 @@ if (isset($_COOKIE['rememberme']) && !empty($_COOKIE['rememberme'])) {
 
 		<script>
 		// AJAX code
-		let registrationForm = document.querySelector('.register form');
-		registrationForm.onsubmit = event => {
+		let loginForm = document.querySelector('.login form');
+		loginForm.onsubmit = event => {
 			event.preventDefault();
-			fetch(registrationForm.action, { method: 'POST', body: new FormData(registrationForm) }).then(response => response.text()).then(result => {
-				if (result.toLowerCase().includes('autologin')) {
+			fetch(loginForm.action, { method: 'POST', body: new FormData(loginForm) }).then(response => response.text()).then(result => {
+				if (result.toLowerCase().includes('success')) {
 					window.location.href = 'home.php';
 				} else {
 					document.querySelector('.msg').innerHTML = result;
 				}
 			});
 		};
-		</script>	
+		</script>
 	</body>
 </html>

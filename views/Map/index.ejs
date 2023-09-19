@@ -169,6 +169,7 @@
                   <tr style="background-color: unset !important; cursor:default;">
                     <th colspan="4" class="h5 text-purple">Players:</th>
                     </tr>
+                  </div>
                 </thead>
                 <tbody id="player-table-body">
                     <!-- Player data will be inserted here dynamically -->
@@ -305,6 +306,7 @@
                 const pixelY = parseFloat(player.position.y) * (height / 1059); // Adjust as needed for height
     
                 // Determine the CSS class for the sprite marker based on admin status
+    
                 const spriteMarkerClass = player.isAdmin && player.isAdmin.toLowerCase() === "true" ? 'sprite-marker-admin' : 'sprite-marker';
     
                 if (!markers[player.name]) {
@@ -516,6 +518,51 @@
     
             slotCount.textContent = `Slot Count: ${data.slots.slotCount}`;
             playersOnline.textContent = `Players Online: ${data.slots.playersOnline}`;
+    
+            // Inside your updateTable function, after fetching data:
+            // Update farmlands table
+            const farmlandsTableBody = document.getElementById('farmlands-table').getElementsByTagName('tbody')[0];
+            farmlandsTableBody.innerHTML = ''; // Clear existing rows
+    
+            data.farmlands.forEach(farmland => {
+              let farmlandOwner = '';
+              if (farmland.owner === "1") {
+                farmlandOwner = "The Green Farm";
+              } else if (farmland.owner === "2") {
+                farmlandOwner = "Trusted";
+              } else if (farmland.owner === "3") {
+                farmlandOwner = "Admin Farm";
+              } else if (farmland.owner === "0") {
+                farmlandOwner = "Not Owned";
+              }
+    
+              // Convert the area to hectares
+              const areaInHectares = convertAreaToHectares(farmland.area);
+    
+              // Create and populate table rows here
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${farmland.id || ''}</td>
+                <td>${farmlandOwner || ''}</td>
+                <td>${areaInHectares || ''} ha</td> <!-- Display area in hectares -->
+              `;
+              farmlandsTableBody.appendChild(row);
+            });
+    
+            // Update fields table
+            const fieldsTableBody = document.getElementById('fields-table').getElementsByTagName('tbody')[0];
+            fieldsTableBody.innerHTML = ''; // Clear existing rows
+    
+            data.fields.forEach(field => {
+              // Create and populate table rows here
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${field.id || ''}</td>
+                <td>${field.fieldX || ''}</td>
+                <td>${field.fieldZ || ''}</td>
+              `;
+              fieldsTableBody.appendChild(row);
+            });
           })
     
           .catch(error => {
@@ -588,7 +635,6 @@
       updateTable();
       setInterval(updateTable, 10000);
     </script>
-    
     
       
 </body>

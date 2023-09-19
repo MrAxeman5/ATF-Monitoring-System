@@ -62,7 +62,7 @@ html, body {
     width: 30%;
     overflow-y: scroll;
     padding: 20px;
-    color: #fff;
+    color: #000;
     background-color: #F0F0F0;
     position: sticky;
 
@@ -107,9 +107,10 @@ html, body {
 [data-bs-theme="light"] tr {
   transition: ease-in-out 0.2s;
   font-weight: bold;
-  background-color: #e9ecef !important;
+  background-color: #e7e7e7 !important;
   border: 0;
   margin-left: 5%;
+  border-radius: 12px;
 }
 [data-bs-theme="dark"] tr {
   transition: ease-in-out 0.2s;
@@ -119,21 +120,42 @@ html, body {
   margin-left: 5%;
 }
 
-#playerTable tr:hover {
+[data-bs-theme="light"] #playerTable tr:hover {
   cursor: pointer;
   background-color: #6f42c1 !important;
   transition: 0.2s ease-in-out;
   color: #ffffff !important;
   border-radius: 6px;
 }
-#fields-table tr:hover {
+[data-bs-theme="light"] #fields-table tr:hover {
   cursor: pointer;
   background-color: #198754 !important;
   transition: 0.2s ease-in-out;
   color: #ffffff !important;
   border-radius: 6px;
 }
-#farmlands-table tr:hover {
+[data-bs-theme="light"] #farmlands-table tr:hover {
+  cursor: pointer;
+  background-color: #e83e8c !important;
+  transition: 0.2s ease-in-out;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+[data-bs-theme="dark"] #playerTable tr:hover {
+  cursor: pointer;
+  background-color: #6f42c1 !important;
+  transition: 0.2s ease-in-out;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+[data-bs-theme="dark"] #fields-table tr:hover {
+  cursor: pointer;
+  background-color: #198754 !important;
+  transition: 0.2s ease-in-out;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+[data-bs-theme="dark"] #farmlands-table tr:hover {
   cursor: pointer;
   background-color: #e83e8c !important;
   transition: 0.2s ease-in-out;
@@ -152,6 +174,7 @@ tr:hover i {
 }
 
 [data-bs-theme="light"] table {
+  --bs-table-bg: transparent !important;
     border-radius: 12px !important;
     border-spacing: 10px !important;
 } 
