@@ -1,0 +1,34 @@
+{
+  "name": "atf-minitoring-system",
+  "version": "1.0.0",
+  "description": "this is for a tracking system that is for the ATF Farming group",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.5.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express-mysql-session": "^3.0.0",
+    "express-php-fpm": "^3.0.0",
+    "express-session": "^1.17.3",
+    "express.js": "^1.0.0",
+    "http-proxy-middleware": "^2.0.6",
+    "mysql": "^2.18.1",
+    "node-php": "^0.0.1",
+    "php": "^1.0.2",
+    "php-built-in-web-server-router": "^1.6.1",
+    "php-express": "^0.0.3",
+    "php-proxy-middleware": "^1.0.1",
+    "twilio": "^4.17.0",
+    "xml2js": "^0.6.2"
+  }
+}

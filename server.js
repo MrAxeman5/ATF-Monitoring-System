@@ -44,7 +44,7 @@ const port = 25565;
 const fs = require('fs');
 const xml2js = require('xml2js');
 const axios = require('axios');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 // Configure express-session middleware
 app.use(session({
   secret: 'oEB94QQf0qCZyfqtn7fxgSB1lVvoweUJ', // Replace with a secret key for session encryption
