@@ -65,35 +65,38 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">ATF Monitoring System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Manage</a>
-                    </li>
-                    <!-- <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            Dropdown
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Action</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                        </ul>
-                    </li> -->
-
-                </ul>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">ATF Monitoring System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Manage</a>
+                </li>
+                <!-- Add your other navigation items here -->
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <!-- Add dropdown for user account -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Welcome, <%= username %> <!-- Replace with the session username -->
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/user/preferences"><i class="icon-cog"></i> Preferences</a></li>
+                        <li><a class="dropdown-item" href="/help/support"><i class="icon-envelope"></i> Contact Support</a></li>
+                        <li class="divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="icon-off"></i> Logout</a></li>
+                    </ul>
+                </li>
+                <!-- Add your theme toggle dropdown here -->
                 <li class="nav-item" style="list-style-type: none;">
                   <div class="d-flex align-items-center gap-3">
                     <div class="d-flex align-items-center dropdown color-modes">
@@ -105,22 +108,6 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme"
                             style="--bs-dropdown-min-width: 8rem;">
-                            <!-- <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center"
-                                    data-bs-theme-value="light"><i class="fa fa-sun" style="color: yellow !important; margin-right: 4px;"></i>Light</button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center"
-                                    data-bs-theme-value="dark"><i class="fas fa-moon" style="color: yellow !important; margin-right: 4px;"></i>Dark
-                                </button>
-                            </li>
-                            <li>
-                                <button type="button" class="dropdown-item d-flex align-items-center active"
-                                    data-bs-theme-value="auto">
-                                    <i class="fas fa-magic"style="margin-right: 4px;"></i> Auto
-                                    <svg class="bi ms-auto d-none"><use href="#check2"></use></svg>
-                                </button>
-                            </li> -->
                             <li>
                               <button type="button" class="dropdown-item d-flex align-items-center"
                                   data-bs-theme-value="light">
@@ -149,16 +136,11 @@
                   </div>
               </div>
           </li>
-                        </ul>
-                    </div>
-                </div>
-            </li>
-            <!-- <li class="nav-item" style="list-style-type: none; ">
-              <img src="https://cdn-icons-png.flaticon.com/512/3177/3177440.png" alt="User Icon" width="2%" style="filter: grayscale(100%);">
-            </li> -->
-            </div>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
+
 
     <div id="container">
         <!-- Bootstrap Sidebar -->

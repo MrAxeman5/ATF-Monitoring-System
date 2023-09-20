@@ -64,20 +64,23 @@ function checkLoggedIn(req, res, next) {
         });
       } else {
         // If the user is not remembered, redirect to the login page
-        res.redirect('/index.php');
+        res.redirect('/');
       }
     });
   } else if (!req.session.loggedin) {
     // If the user is not logged in, redirect to the login page
-    res.redirect('/index.php');
+    res.redirect('/map');
   } else {
     next();
   }
 }
 
 // Export the checkLoggedIn function for use in routes
-module.exports = checkLoggedIn;
-
+module.exports = {
+  checkLoggedIn,
+  con,
+  // Other functions if any...
+};
 // Send activation email function
 function sendActivationEmail(email, code) {
   // Email Subject

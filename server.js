@@ -1,7 +1,10 @@
 require('dotenv').config();
+const main = require('./main.js');
 const express = require('express');
-const bcrypt = require('bcrypt');
-const main = require('./main.js'); // Assuming you have a 'main.js' file with your database connection
+const cookieParser = require('cookie-parser'); // Add this line
+const session = require('express-session');
+
+
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const dcclient = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -41,21 +44,23 @@ const port = 25565;
 const fs = require('fs');
 const xml2js = require('xml2js');
 const axios = require('axios');
-
-// Import the node-php package
-const php = require('node-php');
-app.use('/php', php.cgi(__dirname + '/php'));
+const bcrypt = require('bcrypt');
+// Configure express-session middleware
+app.use(session({
+  secret: 'oEB94QQf0qCZyfqtn7fxgSB1lVvoweUJ', // Replace with a secret key for session encryption
+  resave: false,
+  saveUninitialized: true,
+  // You can customize other session options here
+}));
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.use(express.static('assets'));
-
+app.use(cookieParser());
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 function smsNotifacation(msg) {
   // Twilio SMS notification code (if needed)
 }
-
 
 // Background script to fetch XML data and convert to JSON every 10 seconds
 setInterval(() => {
@@ -106,6 +111,7 @@ setInterval(() => {
 }, 10000); // Run every 10 seconds (10000 milliseconds)
 
 // Route
+
 function secondsToHoursMinutes(seconds) {
   sec = seconds * 60
   const hours = Math.floor(sec / 3600);
@@ -140,7 +146,6 @@ app.get('/api/fetch-data-player-stats', (req, res) => {
             isInVehicle: isInVehicle,
           };
         });
-
 
       // Then send it as JSON response
       res.json({ players: filteredPlayerData });
@@ -227,7 +232,7 @@ app.get('/api/fetch-data-map', (req, res) => {
         const category = vehicle.$?.category;
 
         return { name, type, vX, vY, vZ, controller, category };
-      })
+      });
       const farmlandData = farmlands.map(Farmland => {
         const name = Farmland.$?.name.replace('.', ''); // Remove the dot from the name
         const id = Farmland.$?.id;
@@ -238,7 +243,7 @@ app.get('/api/fetch-data-map', (req, res) => {
         const farmlandZ = Farmland.$?.z;
 
         return { name, id, owner, area, farmlandX, farmlandY, farmlandZ };
-      })
+      });
       const fieldData = fields.map(Field => {
         const id = Field.$?.id;
         const fieldX = Field.$?.x;
@@ -246,7 +251,7 @@ app.get('/api/fetch-data-map', (req, res) => {
         const isOwned = Field.$?.isOwned;
 
         return { id, fieldX, fieldZ, isOwned };
-      })
+      });
       const slotData = {
         slotCount: capacity,
         playersOnline: numUsed,
@@ -269,16 +274,43 @@ app.get('/api/fetch-data-map', (req, res) => {
   });
 });
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
-  res.render("Login/index.ejs")
+  res.render("login.ejs");
 });
 
-app.get('/map', (req, res) => {
-  res.render("Map/index.ejs")
+// Use the checkLoggedIn middleware for routes that require authentication
+app.get('/dashboard', main.checkLoggedIn, (req, res) => {
+  res.render("Map/index.ejs" , { username: req.session.name });;
 });
 
-// Define a route to handle the form submission (authentication)
+// Use the checkLoggedIn middleware for routes that require authentication
+app.get('/map', main.checkLoggedIn, (req, res) => {
+  res.render("Map/index.ejs" , { username: req.session.name });;
+});
+
+// Route to handle user logout
+app.get('/logout', (req, res) => {
+  // Destroy the session to log the user out
+  req.session.destroy((err) => {
+      if (err) {
+          console.error('Error destroying session:', err);
+          res.status(500).send('Error logging out');
+      } else {
+          // Clear the "rememberme" cookie if it exists
+          if (req.cookies.rememberme) {
+              res.clearCookie('rememberme');
+          }
+          // Redirect to the login page (you can change the URL as needed)
+          res.redirect('/');
+      }
+  });
+});
+
 app.post('/authenticate', (req, res) => {
+  console.log('Received POST request to /authenticate');
+  console.log('Request Body:', req.body);
   // Check if the data from the login form was submitted
   if (!req.body.username || !req.body.password) {
     // Could not retrieve the captured data, send an error response
@@ -302,7 +334,7 @@ app.post('/authenticate', (req, res) => {
       // Verify the form password
       if (bcrypt.compareSync(req.body.password, password)) {
         // Check if the account is activated
-        if (account_activation && activation_code !== 'activated') {
+        if (activation_code !== 'activated') {
           // User has not activated their account, send the message
           return res.send('Please activate your account to login! Click <a href="resend-activation.php">here</a> to resend the activation email.');
         } else {
@@ -315,7 +347,7 @@ app.post('/authenticate', (req, res) => {
             req.session.role = role;
 
             // IF the "remember me" checkbox is checked...
-            if (req.body.rememberme) {
+            if (req.body.rememberme !== undefined && req.body.rememberme) {
               // Generate a hash that will be stored as a cookie and in the database. It will be used to identify the user.
               const cookiehash = !empty(rememberme) ? rememberme : bcrypt.hashSync(id + username + 'yoursecretkey', 10);
 
