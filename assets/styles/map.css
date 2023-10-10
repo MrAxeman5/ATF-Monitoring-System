@@ -168,7 +168,9 @@ tr i {
   transition: color 0.2s ease-in-out; 
   
 }
-
+#playerTable td::before {
+  font-family: "Font Awesome 5 Free"; font-weight: 400; content: "\f2bd   ";
+}
 tr:hover i {
   color: #ffffff;
 }

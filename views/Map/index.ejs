@@ -78,7 +78,7 @@
                     <a class="nav-link active" aria-current="page" href="#">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Manage</a>
+                    <a class="nav-link" href="/admin">Manage</a>
                 </li>
                 <!-- Add your other navigation items here -->
             </ul>
@@ -157,9 +157,11 @@
                     <!-- Player data will be inserted here dynamically -->
                 </tbody>
             </table>
+
           </div>
-            <div id="player-info"></div>
-<hr>
+          <hr>
+          <div id="player-info-card"></div>
+          <hr>
             <div class="card p-3 border-left-primary">
                 <div id="last-update"></div>
                 <div id="playersOnline"><p>Players Online:</p></div>
@@ -329,13 +331,13 @@
                   // Update the existing row with new coordinates
                   const playerRow = playerRows.get(player.name);
                   playerRow.innerHTML = `
-                  <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user-circle"></i> ${player.name}</td>
+                  <td class="player-name m-3" id="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
                   `;
                 } else {
                   // Create a new row for the player in the sidebar
                   const playerInfo = document.createElement('tr');
                   playerInfo.innerHTML = `
-                    <td class="player-name m-3" data-lat="${pixelZ}" data-lng="${pixelX}"><i class="fa fa-user-circle"></i> ${player.name}</td>
+                    <td class="player-name m-3" id="player-name" data-lat="${pixelZ}" data-lng="${pixelX}">${player.name}</td>
                   `;
                   playerTableBody.appendChild(playerInfo);
                   playerRows.set(player.name, playerInfo);
@@ -349,71 +351,74 @@
             // Set the initial zoom level and zoom increment
             let initialZoom = -2; // Adjust the initial zoom level as needed
             let zoomIncrement = 1; // Adjust the zoom increment as needed
-    
-            // Add event listeners for table row clicks
-            document.querySelectorAll('#player-table-body tr').forEach(function (row) {
-              row.addEventListener('click', function () {
-                const playerName = row.querySelector('.player-name').textContent;
-                const playerMarker = markers[playerName];
-    
-                // Check if the player is in a vehicle
-                const playerInVehicle = isPlayerInVehicle(playerName, data.vehicles);
-    
-                // Find the vehicle associated with the player
-                let playerVehicle = '';
-                if (playerInVehicle) {
-                  const vehicle = data.vehicles.find(vehicle => vehicle.controller === playerName);
-                  if (vehicle) {
-                    playerVehicle = vehicle.name;
-                  }
-                }
-    
-                // Define playerGroup inside the click event listener
-                const playerGroup = data.players.find(player => player.name === playerName)?.isAdmin === "true" ? 'Admin' : 'Player';
-                const playerUptime = data.players.find(player => player.name === playerName)?.uptime;
-                const playerPosX = data.players.find(player => player.name === playerName)?.position.x;
-                const playerPosZ = data.players.find(player => player.name === playerName)?.position.z;
-    
-                if (playerMarker) {
-                  // Zoom to the player's sprite with an adjusted zoom level
-                  map.setView(playerMarker.getLatLng(), initialZoom + zoomIncrement);
-    
-                  // Create a card for the player information
-                  const playerInfoCard = document.createElement('div');
-                  playerInfoCard.classList.add('card', 'border-left-primary');
-                  playerInfoCard.innerHTML = `
-                    <div class="card-body">
-                      <h5 class="card-title text-primary">${playerName}</h5>
-                      <hr>
-                      <p class="card-text">Permission Group: ${playerGroup}</p>
-                      <p class="card-text">Uptime: ${playerUptime}</p>
-                      <p class="card-text">In Vehicle: ${playerInVehicle ? 'Yes' : 'No'}</p>
-                      <p class="card-text">Vehicle: ${playerInVehicle ? playerVehicle : 'N/a'}</p>
-                      <div class="card-footer">
-                        <h5 class="card-title text-primary">Location</h5>
-                        <p class="card-text">X: ${playerPosX}</p>
-                        <p class="card-text">Z: ${playerPosZ}</p>
-                      </div>
-                      <button class="btn btn-danger close-button">Close</button>
-                    </div>
-                  `;
-    
-                  // Close button event listener
-                  const closeButton = playerInfoCard.querySelector('.close-button');
-                  closeButton.addEventListener('click', function () {
-                    // Remove the player information card when the close button is clicked
-                    playerInfoCard.remove();
-                  });
-    
-                  // Clear any previously displayed player info
-                  const playerInfoContainer = document.getElementById('player-info');
-                  playerInfoContainer.innerHTML = '';
-    
-                  // Append the player info card to the container
-                  playerInfoContainer.appendChild(playerInfoCard);
-                }
-              });
-            });
+
+// Add event listeners for table row clicks
+document.querySelectorAll('#player-table-body tr').forEach(function (row) {
+  row.addEventListener('click', function () {
+    // Update the playerName variable within the event listener
+    const playerName = row.querySelector('.player-name').textContent;
+
+    const playerMarker = markers[playerName];
+
+    // Check if the player is in a vehicle
+    const playerInVehicle = isPlayerInVehicle(playerName, data.vehicles);
+
+    // Find the vehicle associated with the player
+    let playerVehicle = '';
+    if (playerInVehicle) {
+      const vehicle = data.vehicles.find(vehicle => vehicle.controller === playerName);
+      if (vehicle) {
+        playerVehicle = vehicle.name;
+      }
+    }
+
+    // Define playerGroup inside the click event listener
+    const playerGroup = data.players.find(player => player.name === playerName)?.isAdmin === "true" ? 'Admin' : 'Player';
+    const playerUptime = data.players.find(player => player.name === playerName)?.uptime;
+    const playerPosX = data.players.find(player => player.name === playerName)?.position.x;
+    const playerPosZ = data.players.find(player => player.name === playerName)?.position.z;
+
+    if (playerMarker) {
+      // Zoom to the player's sprite with an adjusted zoom level
+      map.setView(playerMarker.getLatLng(), initialZoom + zoomIncrement);
+
+      // Create a card for the player information
+      const playerInfoCard = document.createElement('div');
+      playerInfoCard.classList.add('card', 'border-left-primary');
+      playerInfoCard.innerHTML = `
+        <div class="card-body">
+          <h5 class="card-title text-primary">${playerName}</h5>
+          <hr>
+          <p class="card-text">Permission Group: ${playerGroup}</p>
+          <p class="card-text">Uptime: ${playerUptime}</p>
+          <p class="card-text">In Vehicle: ${playerInVehicle ? 'Yes' : 'No'}</p>
+          <p class="card-text">Vehicle: ${playerInVehicle ? playerVehicle : 'N/a'}</p>
+          <div class="card-footer">
+            <h5 class="card-title text-primary">Location</h5>
+            <p class="card-text">X: ${playerPosX}</p>
+            <p class="card-text">Z: ${playerPosZ}</p>
+          </div>
+          <button class="btn btn-danger close-button">Close</button>
+        </div>
+      `;
+
+ // Close button event listener
+ const closeButton = playerInfoCard.querySelector('.close-button');
+      closeButton.addEventListener('click', function () {
+        // Remove the player information card when the close button is clicked
+        playerInfoCard.remove();
+      });
+
+      // Clear any previously displayed player info
+      const playerInfoContainer = document.getElementById('player-info-card');
+      playerInfoContainer.innerHTML = '';
+
+      // Append the player info card to the container
+      playerInfoContainer.appendChild(playerInfoCard);
+    }
+  });
+});
+
     
             // Handle vehicles
             data.vehicles.forEach(vehicle => {

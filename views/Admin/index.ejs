@@ -1,0 +1,113 @@
+<%- templateAdminHeader('Dashboard', 'Dashboard', 'dashboard', req) %>
+<div class="content-title">
+    <div class="title">
+        <i class="fa-solid fa-gauge-high"></i>
+        <div class="txt">
+            <h2>Dashboard</h2>
+            <p>View statistics, new accounts, and more.</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard">
+    <div class="dashboard">
+        <div class="content-block stat">
+            <div class="data">
+              <h3>New Accounts (&lt;1 day)</h3>
+              <p><%= dashboardData.accounts.toLocaleString() %></p>
+            </div>
+            <i class="fas fa-user-plus"></i>
+            <div class="footer">
+              <i class="fa-solid fa-rotate fa-xs"></i>Total accounts created today
+            </div>
+          </div>
+    
+        <div class="content-block stat">
+            <div class="data">
+                <h3>Total Accounts</h3>
+                <p id="totalAccountsCount"><%= dashboardData.accountsTotal.toLocaleString() %></p>
+            </div>
+            <i class="fas fa-users"></i>
+            <div class="footer">
+                <i class="fa-solid fa-rotate fa-xs"></i>Total accounts
+            </div>
+        </div>
+    
+        <div class="content-block stat">
+            <div class="data">
+                <h3>Active Accounts (&lt;30 days)</h3>
+                <p id="activeAccountsCount"><%= dashboardData.activeAccounts2.toLocaleString() %></p>
+            </div>
+            <i class="fas fa-user-clock"></i>
+            <div class="footer">
+                <i class="fa-solid fa-rotate fa-xs"></i>Total active accounts
+            </div>
+        </div>
+    
+        <div class="content-block stat">
+            <div class="data">
+                <h3>Inactive Accounts (&gt;30 days)</h3>
+                <p id="inactiveAccountsCount"><%= dashboardData.inactiveAccounts.toLocaleString() %></p>
+            </div>
+            <i class="fas fa-user-clock"></i>
+            <div class="footer">
+                <i class="fa-solid fa-rotate fa-xs"></i>Total inactive accounts
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<div class="content-title" style="margin-top:40px">
+    <div class="title">
+        <i class="fas fa-user-clock alt"></i>
+        <div class="txt">
+            <h2>Active Accounts</h2>
+            <p>Accounts active in the last &lt;1 day.</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-block">
+    <div class="table">
+        <table>
+            <thead>
+                <tr>
+                    <td>#</td>
+                    <td>Username</td>
+                    <td class="responsive-hidden">Email</td>
+                    <td class="responsive-hidden">Activation Code</td>
+                    <td class="responsive-hidden">Role</td>
+                    <td class="responsive-hidden">Registered Date</td>
+                    <td class="responsive-hidden">Last Seen</td>
+                    <td>Actions</td>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (!dashboardData.activeAccounts.length) { %>
+                <tr>
+                    <td colspan="8" style="text-align:center;">There are no active accounts</td>
+                </tr>
+                <% } else { %>
+                <% dashboardData.activeAccounts.forEach(function(account) { %>
+                <tr>
+                    <td><%= account.id %></td>
+                    <td><%= account.username %></td>
+                    <td class="responsive-hidden"><%= account.email %></td>
+                    <td class="responsive-hidden"><%= account.activation_code ? account.activation_code : '--' %></td>
+                    <td class="responsive-hidden"><%= account.role %></td>
+                    <td class="responsive-hidden"><%= account.registered %></td>
+                    <td class="responsive-hidden" title="<%= account.last_seen %>"><%= account.last_seen %></td>
+                    <td>
+                        <a href="account/<%= account.id %>" class="link1">Edit</a>
+                        <a href="accounts/delete/<%= account.id %>" onclick="return confirm('Are you sure you want to delete this account?')" class="link1">Delete</a>
+                    </td>
+                </tr>
+                <% }); %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- templateAdminFooter() %>

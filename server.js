@@ -1,9 +1,15 @@
 require('dotenv').config();
-const main = require('./main.js');
+const main = require('./main');
 const express = require('express');
 const cookieParser = require('cookie-parser'); // Add this line
 const session = require('express-session');
+const { checkLoggedIn, templateAdminHeader, templateAdminFooter, timeElapsedString, fetchDashboardData, fetchAccounts, con, getAccountById } = require('./main.js');
+const { v4: uuidv4 } = require('uuid');
+// Define the path to the configuration file
 
+// Read the configuration data from config.js using require
+const config = require('./config');
+const configData = require('./config');
 
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const dcclient = new Client({
@@ -55,7 +61,7 @@ app.use(session({
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.use(express.static('assets'));
-app.use(cookieParser());
+
 // Middleware
 
 function smsNotifacation(msg) {
@@ -273,21 +279,317 @@ app.get('/api/fetch-data-map', (req, res) => {
     }
   });
 });
-
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Import your header and footer templates along with other functions
+
 app.get('/', (req, res) => {
   res.render("login.ejs");
 });
 
 // Use the checkLoggedIn middleware for routes that require authentication
 app.get('/dashboard', main.checkLoggedIn, (req, res) => {
-  res.render("Map/index.ejs" , { username: req.session.name });;
+  res.render("Map/index.ejs", { username: req.session.name });
 });
+
+// ...
+
 
 // Use the checkLoggedIn middleware for routes that require authentication
 app.get('/map', main.checkLoggedIn, (req, res) => {
   res.render("Map/index.ejs" , { username: req.session.name });;
+});
+
+
+app.get('/admin/account', (req, res) => {
+  const accountId = req.query.id;
+  const page = accountId ? 'Edit' : 'Create'; // Determine if it's an edit or create page
+  const error_msg = req.query.error || '';
+  const roles_list = ['Member', 'Admin']; // Replace with your actual list of roles
+
+  // If accountId is provided, retrieve the account by ID
+  if (accountId) {
+    main.getAccountById(accountId, (err, account) => {
+      if (err) {
+        // Handle the error, such as rendering an error page
+        res.status(500).send('An error occurred while retrieving the account.');
+        return;
+      }
+
+      if (!account) {
+        // If no account is found for the provided ID, handle it as needed (e.g., show a 404 page)
+        res.status(404).send('Account not found.');
+        return;
+      }
+
+      // Pass the retrieved account to your template
+      res.render('admin/account', {
+        req,
+        res,
+        page,
+        error_msg,
+        account,
+        roles_list,
+        templateAdminFooter,
+        templateAdminHeader,
+      });
+    });
+  } else {
+    // Handle the case where no accountId is provided (e.g., for creating a new account)
+    res.render('admin/account', {
+      req,
+      res,
+      page,
+      error_msg,
+      account: null, // You can pass null or an empty account object for a new account
+      roles_list,
+      templateAdminFooter,
+      templateAdminHeader,
+    });
+  }
+});
+// Function to check if username already exists
+async function checkUsernameExists(username) {
+  return new Promise((resolve, reject) => {
+    // Query the database to check if the username exists
+    const sql = 'SELECT COUNT(*) AS count FROM accounts WHERE username = ?';
+
+    con.query(sql, [username], (err, result) => {
+      if (err) {
+        console.error('Error checking username:', err);
+        reject(err);
+      } else {
+        const count = result[0].count;
+        resolve(count > 0); // Resolve with true if the username exists, false otherwise
+      }
+    });
+  });
+}
+// Function to check if email already exists
+async function checkEmailExists(email) {
+  return new Promise((resolve, reject) => {
+    // Query the database to check if the email exists
+    const sql = 'SELECT COUNT(*) AS count FROM accounts WHERE email = ?';
+
+    con.query(sql, [email], (err, result) => {
+      if (err) {
+        console.error('Error checking email:', err);
+        reject(err);
+      } else {
+        const count = result[0].count;
+        resolve(count > 0); // Resolve with true if the email exists, false otherwise
+      }
+    });
+  });
+}
+// Function to create a new account
+async function createNewAccount(accountData) {
+  return new Promise((resolve, reject) => {
+    // Insert the new account data into the database
+    const sql = 'INSERT INTO accounts (username, password, email, activation_code, rememberme, role, registered, last_seen) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+
+    con.query(
+      sql,
+      [
+        accountData.username,
+        accountData.password,
+        accountData.email,
+        accountData.activation_code,
+        accountData.rememberme,
+        accountData.role,
+        accountData.registered,
+        accountData.last_seen,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error('Error creating new account:', err);
+          reject(err);
+        } else {
+          resolve(result.insertId); // Resolve with the ID of the newly created account
+        }
+      }
+    );
+  });
+}
+// Function to update an account by ID
+async function updateAccountById(accountId, updatedData) {
+  return new Promise((resolve, reject) => {
+    // Update the account data in the database
+    const sql = 'UPDATE accounts SET username = ?, password = ?, email = ?, activation_code = ?, rememberme = ?, role = ?, registered = ?, last_seen = ? WHERE id = ?';
+
+    con.query(
+      sql,
+      [
+        updatedData.username,
+        updatedData.password,
+        updatedData.email,
+        updatedData.activation_code,
+        updatedData.rememberme,
+        updatedData.role,
+        updatedData.registered,
+        updatedData.last_seen,
+        accountId,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error('Error updating account:', err);
+          reject(err);
+        } else {
+          resolve(result.affectedRows); // Resolve with the number of affected rows (1 if successful)
+        }
+      }
+    );
+  });
+}
+
+// Handle POST request for creating/editing an account
+app.post('/admin/account', async (req, res) => {
+  try {
+    const {
+      username,
+      password,
+      email,
+      activation_code,
+      rememberme,
+      role,
+      registered,
+      last_seen,
+    } = req.body;
+
+    const accountId = req.query.id;
+
+    // Check if username already exists (you'll need to implement this part)
+    const existingUsername = await checkUsernameExists(username);
+
+    if (existingUsername && (accountId ? existingUsername.id !== accountId : true)) {
+      return res.redirect(`/admin/account?error=Username already exists&id=${accountId}`);
+    }
+
+    // Check if email already exists (you'll need to implement this part)
+    const existingEmail = await checkEmailExists(email);
+
+    if (existingEmail && (accountId ? existingEmail.id !== accountId : true)) {
+      return res.redirect(`/admin/account?error=Email already exists&id=${accountId}`);
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (accountId) {
+      // Editing an existing account
+      await updateAccountById(accountId, {
+        username,
+        password: hashedPassword,
+        email,
+        activation_code,
+        rememberme,
+        role,
+        registered,
+        last_seen,
+      }); // Implement this function to update the account by ID
+
+      res.redirect('/admin/account');
+    } else {
+      // Creating a new account
+      const newAccountId = await createNewAccount({
+        username,
+        password: hashedPassword,
+        email,
+        activation_code,
+        rememberme,
+        role,
+        registered,
+        last_seen,
+      }); // Implement this function to create a new account
+
+      res.redirect(`/admin/account?id=${newAccountId}`);
+    }
+  } catch (error) {
+    console.error('Error creating/editing account:', error);
+    return res.status(500).send('An error occurred while creating/editing the account.');
+  }
+});
+
+
+
+
+// Define your routes and use the imported functions and variables 
+app.get('/admin', (req, res) => {
+  // Call fetchDashboardData to get the data
+  fetchDashboardData((err, dashboardData) => {
+    if (err) {
+      // Handle the error, e.g., send an error response
+      return res.status(500).send('Internal Server Error');
+    }
+
+    // Render the admin page with the fetched data
+    res.render('admin/index', {
+      req,
+      res,
+      dashboardData, // Pass the dashboardData object as a local variable
+      templateAdminHeader,
+      templateAdminFooter,
+    });
+  });
+});
+
+
+
+app.get('/admin/accounts', async (req, res) => {
+  try {
+    // Retrieve query parameters from the request
+    const {
+      page = 1,
+      search = '',
+      status = '',
+      activation = '',
+      role = '',
+      order = 'ASC',
+      order_by = 'id',
+      results_per_page = 20,
+    } = req.query;
+
+    // Construct the URL for pagination links
+    const url = `/admin/accounts?page=${page}&search=${search}&status=${status}&activation=${activation}&role=${role}&order=${order}&order_by=${order_by}`;
+
+    // Call the fetchAccounts function from main.js to get account data
+    const { accounts, accounts_total } = await fetchAccounts({
+      page,
+      search,
+      status,
+      activation,
+      role,
+      order,
+      order_by,
+      results_per_page,
+    });
+
+    // Render the HTML template (replace with your template engine)
+    res.render('admin/accounts', {
+      req,
+      res,
+      page,
+      search,
+      status,
+      activation,
+      role,
+      order,
+      order_by,
+      results_per_page,
+      accounts,
+      accounts_total,
+      templateAdminFooter,
+      templateAdminHeader,
+      url, // Pass the 'url' variable to the template
+      // Add other template variables as needed
+    });
+  } catch (error) {
+    console.error('Error fetching accounts:', error);
+    // Handle errors here
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // Route to handle user logout
@@ -389,6 +691,190 @@ app.post('/authenticate', (req, res) => {
     }
   });
 });
+// Handle POST request for creating an account
+app.post('/createAccount', async (req, res) => {
+  try {
+    const { username, password, email, activation_code, rememberme, role } = req.body;
+
+    // Basic input validation
+    if (!username || typeof username !== 'string') {
+      return res.status(400).send('Invalid username.');
+    }
+
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return res.status(400).send('Invalid password. Password must be at least 8 characters long.');
+    }
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).send('Invalid email.');
+    }
+
+    if (!activation_code || typeof activation_code !== 'string') {
+      return res.status(400).send('Invalid activation code.');
+    }
+
+    if (!rememberme || typeof rememberme !== 'string') {
+      return res.status(400).send('Invalid remember me code.');
+    }
+
+    if (!role || typeof role !== 'string') {
+      return res.status(400).send('Invalid role.');
+    }
+
+    // Check if username already exists
+    con.query('SELECT id FROM accounts WHERE username = ?', [username], (err, usernameRows) => {
+      if (err) {
+        console.error('Error querying username:', err);
+        return res.status(500).send('An error occurred while checking username.');
+      }
+
+      if (usernameRows.length > 0) {
+        return res.status(400).send('Username already exists.');
+      }
+
+      // Check if email already exists
+      con.query('SELECT id FROM accounts WHERE email = ?', [email], (err, emailRows) => {
+        if (err) {
+          console.error('Error querying email:', err);
+          return res.status(500).send('An error occurred while checking email.');
+        }
+
+        if (emailRows.length > 0) {
+          return res.status(400).send('Email already exists.');
+        }
+
+        // Hash the password and insert the new account
+        bcrypt.hash(password, 10, (hashErr, hashedPassword) => {
+          if (hashErr) {
+            console.error('Error hashing password:', hashErr);
+            return res.status(500).send('An error occurred while hashing the password.');
+          }
+
+          con.query(
+            'INSERT INTO accounts (username, password, email, activation_code, rememberme, role) VALUES (?, ?, ?, ?, ?, ?)',
+            [username, hashedPassword, email, activation_code, rememberme, role],
+            (insertErr) => {
+              if (insertErr) {
+                console.error('Error inserting account:', insertErr);
+                return res.status(500).send('An error occurred while creating the account.');
+              }
+
+              return res.status(200).send('Account created successfully!');
+            }
+          );
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error creating account:', error);
+    return res.status(500).send('An error occurred while creating the account.');
+  }
+});
+
+// Function to format the key
+function formatKey(key) {
+  key = key.replace(
+    /_|url|db | pass| user| id| uri|oauth|recaptcha/gi,
+    (match) => {
+      const replacements = {
+        _: ' ',
+        url: 'URL',
+        'db ': 'Database ',
+        ' pass': ' Password',
+        ' user': ' Username',
+        ' id': ' ID',
+        ' uri': ' URI',
+        oauth: 'OAuth',
+        recaptcha: 'reCAPTCHA',
+      };
+      return replacements[match.toLowerCase()] || match;
+    }
+  );
+  return key.charAt(0).toUpperCase() + key.slice(1); // Uppercase the first letter
+}
+
+function generateLabelsAndCaptions(config) {
+  const result = {};
+
+  config.tabs.forEach((tab) => {
+    const tabName = tab.name;
+    tab.sections.forEach((section) => {
+      section.keys.forEach((keyObj) => {
+        const { key, caption, value } = keyObj;
+        const userFriendlyLabel = formatKey(key);
+
+        // Include tabName and section.header in the fieldKey for uniqueness
+        const fieldKey = `${tabName}-${section.header}-${key}`;
+
+        result[fieldKey] = {
+          label: `${section.header} - ${userFriendlyLabel}`,
+          caption: caption,
+          key: key,
+          value: value,
+        };
+
+        // Add debug logging
+        console.log(`Generated fieldKey: ${fieldKey}`);
+      });
+    });
+  });
+
+  return result;
+}
+ // Generate labels and captions
+ const labelsAndComments = generateLabelsAndCaptions(config);
+
+ const successMsg = "Settings updated successfully!"; // Initialize it with an appropriate message
+
+ app.get('/admin/settings', (req, res) => {
+  const selectedTab = req.query.tab || 'General';
+
+  try {
+    const configData = require('./config'); // Make sure 'config.js' is in the same directory as this script
+
+    const tabs = configData.tabs.map((tab) => {
+      const sections = tab.sections.map((section) => {
+        const keys = section.keys.map((keyObj) => {
+          const { key, label, caption, value } = keyObj;
+          return {
+            key,
+            label,
+            caption,
+            value,
+          };
+        });
+
+        return {
+          key: section.key,
+          keys,
+        };
+      });
+
+      return {
+        name: tab.name,
+        sections,
+      };
+    });
+
+    // Ensure that tabs is properly structured with sections and keys data
+    console.log('Tabs data:', tabs);
+
+    res.render('admin/settings', {
+      selectedTab: selectedTab,
+      tabs: tabs, // Pass the tabs array to the template
+      fields: configData.fields, // Pass the fields data directly to the template
+      config: config,
+      successMsg: successMsg,
+      templateAdminHeader: templateAdminHeader,
+      templateAdminFooter: templateAdminFooter,
+      req: req,
+    });
+  } catch (error) {
+    console.error('Error reading config file:', error);
+    return res.status(500).send('Error reading config file');
+  }
+});
+
 
 
 // Start the server

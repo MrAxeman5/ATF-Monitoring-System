@@ -1,0 +1,99 @@
+<%- templateAdminHeader('Settings', 'settings', '', req) %>
+<!-- Add this inside your EJS template -->
+<% console.log("Tabs data:", tabs); %>
+
+<form class="custom-form" action="/updateConfig" method="post" id="config-form">
+    <div class="content-title responsive-flex-wrap responsive-pad-bot-3">
+        <h2 class="responsive-width-100">Settings</h2>
+        <input type="submit" name="submit" value="Save" class="btn">
+    </div>
+
+    <% if (successMsg) { %>
+    <div class="msg success">
+        <i class="fas fa-check-circle"></i>
+        <p><%= successMsg %></p>
+        <i class="fas fa-times"></i>
+    </div>
+    <% } %>
+
+    <div class="tabs">
+        <% if (tabs && tabs.length > 0) { %>
+            <% tabs.forEach(tab => { %>
+                <a href="#" class="<%= tab.name === selectedTab ? 'active' : '' %>" data-tab="<%= tab.name %>"><%= tab.name %></a>
+            <% }); %>
+        <% } else { %>
+            <p>No tabs found.</p>
+        <% } %>
+    </div>
+
+    <div class="content-block">
+        <% if (tabs && tabs.length > 0) { %>
+            <% tabs.forEach(tab => { %>
+                <div class="tab-content <%= tab.name %> <%= tab.name === selectedTab ? 'active' : '' %>">
+                    <% if (tab.sections && tab.sections.length > 0) { %>
+                        <% tab.sections.forEach(section => { %>
+                            <div class="section-content <%= section.key %>">
+                                <% if (section.keys && section.keys.length > 0) { %>
+                                    <% section.keys.forEach(keyObj => { %>
+                                        <% const fieldKey = `${tab.name}-${section.key}-${keyObj.key}`; %>
+                                        <% const fieldData = fields[fieldKey]; %> <!-- Updated line -->
+                                        <div class="input-wrapper"> <!-- Added div for input container -->
+                                            <label for="<%= fieldKey %>"><%= fieldData.label ? fieldData.label : 'Label not found' %></label>
+                                            <p class="comment"><%= fieldData.caption ? fieldData.caption : 'Caption not found' %></p>
+                                            <% if (keyObj.key === 'auto_login_after_register') { %>
+                                                <input type="checkbox" name="<%= fieldKey %>" id="<%= fieldKey %>" placeholder="<%= fieldData.label %>"<%= fieldData.value === true ? 'checked' : '' %>>
+                                            <% } else { %>
+                                                <input type="text" name="<%= fieldKey %>" id="<%= fieldKey %>" value="<%= fieldData.value %>" placeholder="<%= fieldData.label %>">
+                                            <% } %>
+                                        </div>
+                                    <% }); %>
+                                <% } else { %>
+                                    <p>No keys found in this section.</p>
+                                <% } %>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p>No sections found in this tab.</p>
+                    <% } %>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No tabs found.</p>
+        <% } %>
+    </div>
+</form>
+
+<!-- Form using the fields data -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.onclick = () => checkbox.value = checkbox.checked ? 'true' : 'false';
+        });
+
+        const tabButtons = document.querySelectorAll('.tabs a');
+
+        tabButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach((btn) => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+
+                const tabName = button.getAttribute('data-tab');
+                const tabContents = document.querySelectorAll('.content-block .form > div');
+                tabContents.forEach((content) => {
+                    content.style.display = 'none';
+                });
+
+                // Show the content block corresponding to the clicked tab
+                document.querySelector(`.tab-content.${tabName}`).style.display = 'block';
+            });
+        });
+
+        // Initially select the first tab
+        tabButtons[0].click();
+    });
+</script>
+
+<%- templateAdminFooter() %>

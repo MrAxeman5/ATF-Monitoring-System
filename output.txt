@@ -1,0 +1,26 @@
+Database Settings - Db host
+Your MySQL database hostname or IP address.
+
+Database Settings - Db user
+Your MySQL database username.
+
+Database Settings - Db pass
+Your MySQL database password.
+
+Database Settings - Db name
+Your MySQL database name.
+
+Database Settings - Db charset
+Your MySQL database charset.
+
+Registration - Auto login after register
+If enabled, the user will be redirected to the homepage automatically upon registration.
+
+Account Activation - Account activation
+If enabled, the account will require email activation before the user can login.
+
+Mail Settings - Mail from
+Change "Your Company Name" and "yourdomain.com" - do not remove the < and > characters.
+
+Mail Settings - Activation link
+The link to the activation file.
