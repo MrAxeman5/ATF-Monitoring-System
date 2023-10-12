@@ -70,50 +70,43 @@ function smsNotifacation(msg) {
 
 // Background script to fetch XML data and convert to JSON every 10 seconds
 setInterval(() => {
-  axios.get('http://173.199.76.125:18001/feed/dedicated-server-stats.xml?code=727abb5e6636298712ede57477209220')
-    .then(response => {
-      const data = response.data;
+  const axios = require('axios');
+  const xml2js = require('xml2js');
+  const fs = require('fs');
 
-      const parser = new xml2js.Parser();
-      parser.parseString(data, (err, result) => {
-        if (err) {
-          smsNotifacation('[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error parsing XML: ' + err)
-          console.error('Error parsing XML:', err);
-          dcnotifacation("ERROR", err);
-          fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error fetching XML data: ' + error, (appendError) => {
-            if (appendError) {
-              console.error('Error appending to log file:', appendError);
+  try {
+    axios.get('http://173.199.76.125:18001/feed/dedicated-server-stats.xml?code=727abb5e6636298712ede57477209220')
+      .then(response => {
+        const data = response.data;
+
+        const parser = new xml2js.Parser();
+        parser.parseString(data, (err, result) => {
+
+          const jsonData = JSON.stringify(result);
+          fs.writeFile('data.json', jsonData, 'utf-8', (err) => {
+            if (err) {
+              smsNotifacation('[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error writing JSON file: ' + err)
+              dcnotifacation("ERROR", err)
+              console.error('Error writing JSON file:', err);
+              fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error writing JSON file: ' + err, (appendError) => {
+                if (appendError) {
+                  console.error('Error appending to log file:', appendError);
+                }
+              });
+            } else {
+              console.log('XML data successfully converted to JSON');
             }
           });
-
-          return;
-        }
-
-        const jsonData = JSON.stringify(result);
-        fs.writeFile('data.json', jsonData, 'utf-8', (err) => {
-          if (err) {
-            smsNotifacation('[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error writing JSON file: ' + err)
-            dcnotifacation("ERROR", err)
-            console.error('Error writing JSON file:', err);
-            fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error writing JSON file: ' + err, (appendError) => {
-              if (appendError) {
-                console.error('Error appending to log file:', appendError);
-              }
-            });
-
-
-          } else {
-            console.log('XML data successfully converted to JSON');
-          }
         });
-      });
-    })
-    .catch(error => {
-      console.error('Error fetching XML data:', error)
-      dcnotifacation("ERROR", error);
-      fs.appendFile('errlog.txt', '[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error fetching XML data: ' + error)
-      smsNotifacation('[' + new Date + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error fetching XML data: ' + error)
-    });
+      })
+      
+  } catch (error) {
+    console.log('[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + ': ' + err)
+    smsNotifacation('[' + new Date() + ']' + '(' + new Date().toLocaleTimeString() + ')' + 'Error with JSON file: ' + err)
+    dcnotifacation("ERROR", error)
+    // Handle the error as needed.
+  }
+
 }, 10000); // Run every 10 seconds (10000 milliseconds)
 
 // Route
