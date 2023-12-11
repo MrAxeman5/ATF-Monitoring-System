@@ -115,9 +115,9 @@ setInterval(() => {
 				const parser = new xml2js.Parser();
 				parser.parseString(data, (err, result) => {
 					const jsonData = JSON.stringify(result);
-					const isValidJson = isValidJson(jsonData);
+					const validJson = isValidJson(jsonData);
 
-					if (isValidJson) {
+					if (validJson) {
 						fs.writeFile("data.json", jsonData, "utf-8", (err) => {
 							if (err) {
 								smsNotifacation(
