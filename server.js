@@ -53,6 +53,15 @@ function dcnotifacation(type, msg) {
 	}
 }
 
+function isValidJson(jsonString) {
+	try {
+		JSON.parse(jsonString);
+		return true;
+	} catch (err) {
+		return false;
+	}
+}
+
 const app = express();
 
 const port = 25565;
@@ -60,6 +69,7 @@ const fs = require("fs");
 const xml2js = require("xml2js");
 const axios = require("axios");
 const bcrypt = require("bcryptjs");
+const { triggerAsyncId } = require("async_hooks");
 const Agent = require("agentkeepalive").HttpsAgent;
 
 const agentkeepalive = new Agent({
@@ -105,40 +115,47 @@ setInterval(() => {
 				const parser = new xml2js.Parser();
 				parser.parseString(data, (err, result) => {
 					const jsonData = JSON.stringify(result);
-					fs.writeFile("data.json", jsonData, "utf-8", (err) => {
-						if (err) {
-							smsNotifacation(
-								"[" +
-									new Date() +
-									"]" +
-									"(" +
-									new Date().toLocaleTimeString() +
-									")" +
-									"Error writing JSON file: " +
-									err
-							);
-							dcnotifacation("ERROR", err);
-							console.error("Error writing JSON file:", err);
-							fs.appendFile(
-								"errlog.txt",
-								"[" +
-									new Date() +
-									"]" +
-									"(" +
-									new Date().toLocaleTimeString() +
-									")" +
-									"Error writing JSON file: " +
-									err,
-								(appendError) => {
-									if (appendError) {
-										console.error("Error appending to log file:", appendError);
+					const isValidJson = isValidJson(jsonData);
+
+					if (isValidJson) {
+						fs.writeFile("data.json", jsonData, "utf-8", (err) => {
+							if (err) {
+								smsNotifacation(
+									"[" +
+										new Date() +
+										"]" +
+										"(" +
+										new Date().toLocaleTimeString() +
+										")" +
+										"Error writing JSON file: " +
+										err
+								);
+								dcnotifacation("ERROR", err);
+								console.error("Error writing JSON file:", err);
+								fs.appendFile(
+									"errlog.txt",
+									"[" +
+										new Date() +
+										"]" +
+										"(" +
+										new Date().toLocaleTimeString() +
+										")" +
+										"Error writing JSON file: " +
+										err,
+									(appendError) => {
+										if (appendError) {
+											console.error(
+												"Error appending to log file:",
+												appendError
+											);
+										}
 									}
-								}
-							);
-						} else {
-							console.log("XML data successfully converted to JSON");
-						}
-					});
+								);
+							} else {
+								console.log("XML data successfully converted to JSON");
+							}
+						});
+					}
 				});
 			});
 	} catch (error) {
