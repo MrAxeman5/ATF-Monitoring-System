@@ -5,11 +5,13 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js ",
+    "socket": "node socket.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "agentkeepalive": "^4.5.0",
     "axios": "^1.5.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",

@@ -13,6 +13,22 @@ const {
 	con,
 	getAccountById,
 } = require("./main.js");
+const webSocket = require("ws")
+var wsPong=new webSocket('ws://localhost:8080')
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+
+var log = [];
+console.log = function(message) {
+	sleep(1000).then(() => {wsPong.send(message)})
+    //Send logMessage
+	
+};
+
+
 const { v4: uuidv4 } = require("uuid");
 // Define the path to the configuration file
 
