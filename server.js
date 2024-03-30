@@ -468,10 +468,36 @@ app.get("/dashboard", main.checkLoggedIn, (req, res) => {
 
 // ...
 
-// Use the checkLoggedIn middleware for routes that require authentication
 app.get("/map", main.checkLoggedIn, (req, res) => {
-	res.render("Map/index.ejs", { username: req.session.name });
+    // const mapID = req.query.mapID; // Assuming mapID is sent as a query parameter
+    const mapID = 1; // Assuming mapID is sent as a query parameter
+
+    // Execute SQL query to fetch settings based on mapID
+    const sql = 'SELECT imageUrl, height, width FROM mapConfig WHERE mapid = ?';
+    con.query(sql, [mapID], (err, results) => {
+        if (err) {
+            console.error('Error executing SQL query:', err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send('Settings not found');
+        }
+
+        const { imageUrl, height, width } = results[0];
+        
+        // Render the EJS template with the fetched data
+        res.render("Map/index", {
+            imageUrl,
+            height,
+            width,
+            username: req.session.name
+        });
+    });
 });
+
+  
+
 
 app.get("/admin/account", (req, res) => {
 	const accountId = req.query.id;
@@ -695,23 +721,54 @@ app.post("/admin/account", async (req, res) => {
 
 // Define your routes and use the imported functions and variables
 app.get("/admin", (req, res) => {
-	// Call fetchDashboardData to get the data
-	fetchDashboardData((err, dashboardData) => {
-		if (err) {
-			// Handle the error, e.g., send an error response
-			return res.status(500).send("Internal Server Error");
-		}
+	const userId = req.session.id;
+	
+	const sql = 'SELECT role, username FROM accounts WHERE id = ?';
+	con.query(sql, [userId], (err, results) => {
+	  if (err) {
+		console.error('Error executing SQL query:', err);
+		res.status(500).send('Internal Server Error');
+	  } else {
+		if (results.length === 0) {
+		  res.status(403).send('You do not have permission to access this page!');
+		} else {
+		  const userRole = results[0].role;
+		  const username = results[0].username;
 
-		// Render the admin page with the fetched data
-		res.render("admin/index", {
-			req,
-			res,
-			dashboardData, // Pass the dashboardData object as a local variable
-			templateAdminHeader,
-			templateAdminFooter,
-		});
+		  // Logging user details to the console
+		  console.log(`User ${username} with ID ${userId} and role ${userRole} accessed the admin page.`);
+  
+		  if (userRole !== 'Admin') { // Ensure role comparison is case-sensitive
+			console.log(`Access denied for user ${username} with ID ${userId} because they do not have admin privileges.`);
+			res.status(403).send('You do not have permission to access this page!');
+		  } else {
+			console.log(`Admin page accessed by user ${username} with ID ${userId}.`);
+			
+			// Call fetchDashboardData to get the data
+			fetchDashboardData((err, dashboardData) => {
+			  if (err) {
+				// Handle the error, e.g., send an error response
+				console.error('Error fetching dashboard data:', err);
+				return res.status(500).send("Internal Server Error");
+			  }
+  
+			  // Render the admin page with the fetched data
+			  res.render("admin/index", {
+				req,
+				res,
+				dashboardData, // Pass the dashboardData object as a local variable
+				templateAdminHeader,
+				templateAdminFooter,
+			  });
+			});
+		  }
+		}
+	  }
 	});
 });
+
+
+  
 
 app.get("/admin/accounts", async (req, res) => {
 	try {
