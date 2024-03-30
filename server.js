@@ -470,7 +470,7 @@ app.get("/dashboard", main.checkLoggedIn, (req, res) => {
 
 app.get("/map", main.checkLoggedIn, (req, res) => {
     // const mapID = req.query.mapID; // Assuming mapID is sent as a query parameter
-    const mapID = 1; // Assuming mapID is sent as a query parameter
+    const mapID = 2; // Assuming mapID is sent as a query parameter
 
     // Execute SQL query to fetch settings based on mapID
     const sql = 'SELECT imageUrl, height, width FROM mapConfig WHERE mapid = ?';
